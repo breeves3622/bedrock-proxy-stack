@@ -51,9 +51,10 @@ A complete Docker solution designed for **Portainer** and home servers to:
 
 ### Method 1: Portainer Git Repository Stack (Recommended)
 1. In Portainer, navigate to **Stacks** -> **Add stack**.
-2. Select **Repository**.
-3. Point to your repository containing this directory.
-4. Set Compose path to `docker-compose.yml`.
+2. Select **Repository**:
+   - **Repository URL:** `https://github.com/breeves3622/bedrock-proxy-stack`
+   - **Repository reference:** `refs/heads/main` (or `refs/heads/master`, or leave blank)
+   - **Compose path:** `docker-compose.yml`
 5. Click **Deploy the stack**. Portainer will automatically build the `web-ui` image and start both containers.
 
 ### Method 2: Local Directory / Web Editor
