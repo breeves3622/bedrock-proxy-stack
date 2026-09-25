@@ -1,0 +1,12 @@
+{
+  "name": "custom-bedrock-proxy",
+  "version": "1.0.0",
+  "description": "Custom Minecraft Bedrock LAN Proxy with GUI Menu",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bedrock-protocol": "^3.42.0"
+  }
+}

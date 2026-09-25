@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  # -------------------------------------------------------------------------
+  # 1. Bedrock Proxy Service (BedrockConnect)
+  #    Broadcasts on LAN UDP 19132 and serves the in-game server menu
+  # -------------------------------------------------------------------------
+  bedrock-proxy:
+    image: pugmatt/bedrock-connect:latest
+    container_name: bedrock-proxy
+    restart: unless-stopped
+    # On Linux/Portainer hosts: 'network_mode: host' enables local LAN broadcast
+    # discovery so console/mobile/PC clients see the game in the Friends tab.
+    network_mode: host
+    environment:
+      - BC_CUSTOM_SERVERS=/custom_servers.json
+      - BC_USER_SERVERS=true
+      - BC_SERVER_LIMIT=50
+      - BC_DB_TYPE=none
+      - BC_MOTD_1=§bMy Bedrock Proxy
+      - BC_MOTD_2=§aSelect a server to play!
+      - BC_KICK_INACTIVE=true
+      - BC_ONLINE_MODE=true
+    volumes:
+      - ./custom_servers.json:/custom_servers.json
+      - ./players:/players
+
+  # -------------------------------------------------------------------------
+  # 2. Web Management Dashboard
+  #    Web interface to add/edit servers, test pings, view logs & restart proxy
+  # -------------------------------------------------------------------------
+  proxy-web-ui:
+    build: ./web-ui
+    container_name: bedrock-proxy-web
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+    environment:
+      - PORT=8080
+      - SERVERS_FILE=/data/custom_servers.json
+      - TARGET_CONTAINER=bedrock-proxy
+      # Optional: set a password to protect the web dashboard (leave empty for none)
+      - ADMIN_PASSWORD=
+    volumes:
+      # Mount the server list so the web UI can read and write updates
+      - ./custom_servers.json:/data/custom_servers.json
+      # Mount Docker socket to allow status check, restart, and log streaming
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - bedrock-proxy

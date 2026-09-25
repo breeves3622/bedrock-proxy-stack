@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft Bedrock Proxy Manager</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --border-radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 24px; min-height: 100vh; }
+    .container { max-width: 900px; margin: 0 auto; }
+
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+    .title-group h1 { font-size: 1.6rem; display: flex; align-items: center; gap: 10px; }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+
+    /* Cards */
+    .card { background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--border-radius); padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+    
+    /* Status Bar */
+    .status-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .status-badge { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; padding: 6px 14px; border-radius: 20px; background: rgba(255,255,255,0.05); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); }
+    .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .status-dot.stopped { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+    .status-dot.restarting { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; border: none; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: background 0.2s, opacity 0.2s; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: #000; }
+    .btn-primary:hover { background: var(--primary-hover); color: #fff; }
+    .btn-secondary { background: #334155; color: var(--text); }
+    .btn-secondary:hover { background: #475569; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: var(--danger-hover); }
+    .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Server List */
+    .server-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .server-item { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 6px; margin-bottom: 10px; gap: 12px; }
+    .server-info { flex: 1; }
+    .server-name { font-weight: 600; font-size: 1.05rem; }
+    .server-address { color: var(--text-muted); font-size: 0.85rem; font-family: monospace; margin-top: 3px; }
+    .server-ping { margin-right: 12px; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+    .server-actions { display: flex; gap: 6px; align-items: center; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
+
+    /* Modal */
+    .modal-backdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); z-index: 100; align-items: center; justify-content: center; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--border-radius); width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .modal-title { font-size: 1.2rem; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); }
+    .form-control { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid var(--card-border); border-radius: 6px; color: var(--text); font-size: 0.95rem; }
+    .form-control:focus { outline: none; border-color: var(--primary); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    /* Logs Viewer */
+    .logs-box { background: #090d16; border: 1px solid #1e293b; border-radius: 6px; padding: 14px; font-family: monospace; font-size: 0.82rem; height: 350px; overflow-y: auto; color: #a5f3fc; white-space: pre-wrap; word-break: break-all; }
+
+    /* Toast Notification */
+    .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 6px; background: #334155; color: #fff; font-size: 0.9rem; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+    .toast.success { background: #15803d; }
+    .toast.danger { background: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <h1>🎮 Bedrock Proxy Manager</h1>
+        <div class="subtitle">Custom Server Menu & LAN Broadcast Service for Portainer</div>
+      </div>
+      <div>
+        <button class="btn btn-secondary" onclick="openLogsModal()">📜 View Proxy Logs</button>
+      </div>
+    </header>
+
+    <!-- Proxy Container Status Card -->
+    <div class="card">
+      <div class="status-bar">
+        <div style="display:flex; align-items:center; gap: 12px;">
+          <div class="status-badge">
+            <span class="status-dot" id="proxyDot"></span>
+            <span id="proxyStatusText">Checking container...</span>
+          </div>
+          <span id="proxyDetails" style="font-size: 0.85rem; color: var(--text-muted);"></span>
+        </div>
+        <div style="display:flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="checkProxyStatus()">🔄 Refresh Status</button>
+          <button class="btn btn-danger btn-sm" id="btnRestart" onclick="restartProxy()">⚡ Restart Proxy Service</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Server List Management Card -->
+    <div class="card">
+      <div class="server-list-header">
+        <div>
+          <h2>Available Servers</h2>
+          <div class="subtitle">These servers are displayed inside the in-game Bedrock menu</div>
+        </div>
+        <div style="display:flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="pingAllServers()">📡 Ping All</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">➕ Add Server</button>
+        </div>
+      </div>
+
+      <div id="serverListContainer">
+        <div class="empty-state">Loading servers...</div>
+      </div>
+
+      <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--card-border); padding-top: 16px;">
+        <span style="font-size: 0.85rem; color: var(--text-muted);" id="unsavedNotice"></span>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary" id="btnSaveOnly" onclick="saveServers(false)">💾 Save Changes</button>
+          <button class="btn btn-primary" id="btnSaveRestart" onclick="saveServers(true)">🚀 Save & Restart Proxy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Server Modal -->
+  <div class="modal-backdrop" id="serverModal">
+    <div class="modal">
+      <h3 class="modal-title" id="modalTitle">Add Minecraft Server</h3>
+      <div class="form-group">
+        <label>Server Display Name</label>
+        <input type="text" class="form-control" id="modalServerName" placeholder="e.g. Local Survival SMP">
+      </div>
+      <div class="form-group">
+        <label>IP Address / Hostname</label>
+        <input type="text" class="form-control" id="modalServerAddress" placeholder="e.g. 192.168.1.100 or play.myserver.com">
+      </div>
+      <div class="form-group">
+        <label>Port (Default 19132)</label>
+        <input type="number" class="form-control" id="modalServerPort" value="19132">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="testModalServer()">📡 Test Connection</button>
+        <span id="modalTestResult" style="font-size: 0.85rem; margin-left: 10px;"></span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmSaveModal()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs Modal -->
+  <div class="modal-backdrop" id="logsModal">
+    <div class="modal" style="max-width: 750px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 class="modal-title" style="margin: 0;">📜 Proxy Service Logs</h3>
+        <button class="btn btn-secondary btn-sm" onclick="fetchLogs()">🔄 Refresh</button>
+      </div>
+      <div class="logs-box" id="logsContent">Loading logs...</div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeLogsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let servers = [];
+    let editingIndex = -1;
+    let hasUnsavedChanges = false;
+    let authToken = '';
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast show ${type}`;
+      setTimeout(() => { toast.className = 'toast'; }, 3000);
+    }
+
+    async function apiRequest(endpoint, method = 'GET', data = null) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+      const res = await fetch(endpoint, {
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : null
+      });
+      return res.json();
+    }
+
+    async function checkProxyStatus() {
+      const dot = document.getElementById('proxyDot');
+      const text = document.getElementById('proxyStatusText');
+      const details = document.getElementById('proxyDetails');
+
+      try {
+        const data = await apiRequest('/api/proxy/status');
+        if (data.running) {
+          dot.className = 'status-dot online';
+          text.textContent = `Proxy Running (${data.status})`;
+          details.textContent = `Container: ${data.container}`;
+        } else if (data.status === 'restarting') {
+          dot.className = 'status-dot restarting';
+          text.textContent = 'Proxy Restarting...';
+          details.textContent = '';
+        } else {
+          dot.className = 'status-dot stopped';
+          text.textContent = `Proxy Inactive (${data.status})`;
+          details.textContent = data.error || 'Container is not running';
+        }
+      } catch (err) {
+        dot.className = 'status-dot stopped';
+        text.textContent = 'Unable to query Docker status';
+        details.textContent = 'Check docker socket mount';
+      }
+    }
+
+    async function restartProxy() {
+      if (!confirm('Are you sure you want to restart the Bedrock Proxy service?')) return;
+      const btn = document.getElementById('btnRestart');
+      btn.disabled = true;
+      btn.textContent = '⚡ Restarting...';
+
+      try {
+        const res = await apiRequest('/api/proxy/restart', 'POST');
+        if (res.success) {
+          showToast('Proxy restarted successfully!', 'success');
+          setTimeout(checkProxyStatus, 2000);
+        } else {
+          showToast('Restart failed: ' + (res.error || 'Unknown error'), 'danger');
+        }
+      } catch (e) {
+        showToast('Error requesting restart', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⚡ Restart Proxy Service';
+      }
+    }
+
+    async function loadServers() {
+      try {
+        const data = await apiRequest('/api/servers');
+        servers = data.servers || [];
+        renderServerList();
+        pingAllServers();
+      } catch (e) {
+        document.getElementById('serverListContainer').innerHTML =
+          `<div class="empty-state" style="color:var(--danger)">Failed to load servers list.</div>`;
+      }
+    }
+
+    function renderServerList() {
+      const container = document.getElementById('serverListContainer');
+      if (servers.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>No servers configured yet.</p>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openAddModal()">➕ Add Your First Server</button>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = servers.map((s, index) => `
+        <div class="server-item" id="server-row-${index}">
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:10px;" onclick="moveServer(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
+              <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:10px;" onclick="moveServer(${index}, 1)" ${index === servers.length - 1 ? 'disabled' : ''}>▼</button>
+            </div>
+            <div class="server-info">
+              <div class="server-name">${escapeHtml(s.name)}</div>
+              <div class="server-address">${escapeHtml(s.address)}:${s.port}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center;">
+            <span class="server-ping" id="ping-${index}">
+              <span class="status-dot"></span> Checking...
+            </span>
+            <div class="server-actions">
+              <button class="btn btn-secondary btn-sm" onclick="openEditModal(${index})">✏️ Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteServer(${index})">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function moveServer(index, dir) {
+      const target = index + dir;
+      if (target < 0 || target >= servers.length) return;
+      const temp = servers[index];
+      servers[index] = servers[target];
+      servers[target] = temp;
+      markUnsaved();
+      renderServerList();
+    }
+
+    function markUnsaved() {
+      hasUnsavedChanges = true;
+      document.getElementById('unsavedNotice').textContent = '⚠️ You have unsaved changes.';
+    }
+
+    function clearUnsaved() {
+      hasUnsavedChanges = false;
+      document.getElementById('unsavedNotice').textContent = '';
+    }
+
+    async function pingAllServers() {
+      servers.forEach(async (s, index) => {
+        const pingEl = document.getElementById(`ping-${index}`);
+        if (!pingEl) return;
+        pingEl.innerHTML = `<span class="status-dot"></span> Pinging...`;
+
+        try {
+          const res = await apiRequest(`/api/ping?host=${encodeURIComponent(s.address)}&port=${s.port}`);
+          if (res.online) {
+            pingEl.innerHTML = `
+              <span class="status-dot online"></span>
+              <span style="color:var(--success)">${res.latency}ms</span>
+              ${res.players !== undefined ? `<span style="color:var(--text-muted); font-size:0.78rem;">(${res.players}/${res.maxPlayers})</span>` : ''}
+            `;
+          } else {
+            pingEl.innerHTML = `<span class="status-dot stopped"></span> <span style="color:var(--danger)">Offline</span>`;
+          }
+        } catch (e) {
+          pingEl.innerHTML = `<span class="status-dot stopped"></span> Unreachable`;
+        }
+      });
+    }
+
+    function openAddModal() {
+      editingIndex = -1;
+      document.getElementById('modalTitle').textContent = 'Add Minecraft Server';
+      document.getElementById('modalServerName').value = '';
+      document.getElementById('modalServerAddress').value = '';
+      document.getElementById('modalServerPort').value = '19132';
+      document.getElementById('modalTestResult').textContent = '';
+      document.getElementById('serverModal').classList.add('open');
+    }
+
+    function openEditModal(index) {
+      editingIndex = index;
+      const s = servers[index];
+      document.getElementById('modalTitle').textContent = 'Edit Minecraft Server';
+      document.getElementById('modalServerName').value = s.name;
+      document.getElementById('modalServerAddress').value = s.address;
+      document.getElementById('modalServerPort').value = s.port;
+      document.getElementById('modalTestResult').textContent = '';
+      document.getElementById('serverModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('serverModal').classList.remove('open');
+    }
+
+    async function testModalServer() {
+      const host = document.getElementById('modalServerAddress').value.trim();
+      const port = document.getElementById('modalServerPort').value.trim();
+      const resEl = document.getElementById('modalTestResult');
+
+      if (!host || !port) {
+        resEl.textContent = 'Enter address & port first.';
+        resEl.style.color = 'var(--warning)';
+        return;
+      }
+
+      resEl.textContent = 'Pinging...';
+      resEl.style.color = 'var(--text-muted)';
+
+      try {
+        const res = await apiRequest(`/api/ping?host=${encodeURIComponent(host)}&port=${port}`);
+        if (res.online) {
+          resEl.textContent = `Online (${res.latency}ms) - ${res.serverName || 'Bedrock'}`;
+          resEl.style.color = 'var(--success)';
+        } else {
+          resEl.textContent = 'Offline or no response';
+          resEl.style.color = 'var(--danger)';
+        }
+      } catch (e) {
+        resEl.textContent = 'Ping failed';
+        resEl.style.color = 'var(--danger)';
+      }
+    }
+
+    function confirmSaveModal() {
+      const name = document.getElementById('modalServerName').value.trim();
+      const address = document.getElementById('modalServerAddress').value.trim();
+      const port = parseInt(document.getElementById('modalServerPort').value.trim(), 10);
+
+      if (!name || !address || isNaN(port)) {
+        alert('Please fill in all fields with valid values.');
+        return;
+      }
+
+      const serverObj = { name, address, port };
+
+      if (editingIndex >= 0) {
+        servers[editingIndex] = serverObj;
+      } else {
+        servers.push(serverObj);
+      }
+
+      closeModal();
+      markUnsaved();
+      renderServerList();
+      pingAllServers();
+    }
+
+    function deleteServer(index) {
+      if (!confirm(`Delete "${servers[index].name}" from server list?`)) return;
+      servers.splice(index, 1);
+      markUnsaved();
+      renderServerList();
+    }
+
+    async function saveServers(andRestart = false) {
+      const btn = andRestart ? document.getElementById('btnSaveRestart') : document.getElementById('btnSaveOnly');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const res = await apiRequest('/api/servers', 'POST', { servers });
+        if (res.success) {
+          clearUnsaved();
+          showToast('Server list saved successfully!', 'success');
+
+          if (andRestart) {
+            btn.textContent = 'Restarting Proxy...';
+            const restartRes = await apiRequest('/api/proxy/restart', 'POST');
+            if (restartRes.success) {
+              showToast('Proxy restarted with updated servers!', 'success');
+              setTimeout(checkProxyStatus, 2000);
+            } else {
+              showToast('Saved, but failed to restart proxy: ' + (restartRes.error || ''), 'warning');
+            }
+          }
+        } else {
+          showToast('Error saving: ' + (res.error || 'Unknown error'), 'danger');
+        }
+      } catch (e) {
+        showToast('Failed to save servers', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    async function openLogsModal() {
+      document.getElementById('logsModal').classList.add('open');
+      fetchLogs();
+    }
+
+    function closeLogsModal() {
+      document.getElementById('logsModal').classList.remove('open');
+    }
+
+    async function fetchLogs() {
+      const box = document.getElementById('logsContent');
+      box.textContent = 'Fetching logs from container...';
+      try {
+        const res = await apiRequest('/api/proxy/logs?tail=100');
+        if (res.logs) {
+          box.textContent = res.logs || '(No logs yet)';
+          box.scrollTop = box.scrollHeight;
+        } else {
+          box.textContent = res.error || 'Failed to retrieve logs.';
+        }
+      } catch (e) {
+        box.textContent = 'Error connecting to Docker API.';
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Initialize
+    loadServers();
+    checkProxyStatus();
+    setInterval(checkProxyStatus, 10000);
+  </script>
+</body>
+</html>
