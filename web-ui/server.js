@@ -337,24 +337,31 @@ const server = http.createServer(async (req, res) => {
       let detectedGamertag = ''
 
       if (isRunning) {
-        const logRes = await dockerRequest(`/containers/${XBOX_CONTAINER}/logs?stdout=1&stderr=1&tail=150`)
-        let rawLogs = typeof logRes.body === 'string' ? logRes.body : ''
-        logs = rawLogs.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '')
+        try {
+          const logRes = await dockerRequest(`/containers/${XBOX_CONTAINER}/logs?stdout=1&stderr=1&tail=150`)
+          let rawLogs = typeof logRes.body === 'string' ? logRes.body : ''
+          logs = rawLogs.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '')
 
-        // Try extracting gamertag from logs
-        const tagMatch = logs.match(/(?:Account linked|Logged in as|Broadcasting as|Gamertag)[:\s]+([A-Za-z0-9_ #]+)/i)
-        if (tagMatch) detectedGamertag = tagMatch[1].trim()
+          const linkMatch = logs.match(/https?:\/\/(?:www\.)?microsoft\.com\/link/i)
+          const codeMatch = logs.match(/(?:code|enter)[:\s]+([A-Z0-9]{8,10})/i) || logs.match(/\b([A-Z0-9]{4}-[A-Z0-9]{4})\b/)
 
-        const isLinkedOrBroadcasting = Boolean(
-          detectedGamertag ||
-          /Account linked|Xbox Broadcast:\s*Ready|Creating Xbox LIVE session|Session is now active|Broadcasting as|Logged in as/i.test(logs)
-        )
+          // Try extracting gamertag from logs
+          const tagMatch = logs.match(/(?:Successfully authenticated as|Account linked|Logged in as|Broadcasting as|Gamertag)[:\s]+([A-Za-z0-9_ #]+)/i)
+          if (tagMatch) detectedGamertag = tagMatch[1].trim()
 
-        // Only mark authRequired if the prompt exists AND we are not yet linked/broadcasting
-        if (linkMatch && codeMatch && !isLinkedOrBroadcasting) {
-          authRequired = true
-          authUrl = linkMatch[0]
-          authCode = codeMatch[1]
+          const isLinkedOrBroadcasting = Boolean(
+            detectedGamertag ||
+            /Successfully authenticated|Account linked|Xbox Broadcast:\s*Ready|Creating Xbox LIVE session|Creation of Xbox LIVE session was successful|Session is now active|Broadcasting as|Logged in as/i.test(logs)
+          )
+
+          // Only mark authRequired if the prompt exists AND we are not yet linked/broadcasting
+          if (linkMatch && codeMatch && !isLinkedOrBroadcasting) {
+            authRequired = true
+            authUrl = linkMatch[0]
+            authCode = codeMatch[1]
+          }
+        } catch (e) {
+          console.error('Error parsing Xbox logs:', e.message)
         }
       }
 
