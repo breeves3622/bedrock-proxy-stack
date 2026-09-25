@@ -126,9 +126,26 @@ function pingBedrock(host, port, timeoutMs = 2000) {
 // Read servers from custom_servers.json
 function readServers() {
   try {
+    const dir = path.dirname(SERVERS_FILE)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+
     if (!fs.existsSync(SERVERS_FILE)) {
+      const defaultServers = [
+        { name: 'Local Survival Server', address: '192.168.1.100', port: 19133 },
+        { name: 'Creative World', address: '192.168.1.100', port: 19134 }
+      ]
+      writeServers(defaultServers)
+      return defaultServers
+    }
+
+    const stat = fs.statSync(SERVERS_FILE)
+    if (stat.isDirectory()) {
+      console.error(`SERVERS_FILE (${SERVERS_FILE}) is a directory! Expected a json file.`)
       return []
     }
+
     const content = fs.readFileSync(SERVERS_FILE, 'utf8')
     return JSON.parse(content)
   } catch (err) {
@@ -139,6 +156,10 @@ function readServers() {
 
 // Write servers to custom_servers.json safely
 function writeServers(servers) {
+  const dir = path.dirname(SERVERS_FILE)
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+  }
   const content = JSON.stringify(servers, null, 2)
   fs.writeFileSync(SERVERS_FILE, content, 'utf8')
 }

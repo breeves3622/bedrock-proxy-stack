@@ -95,7 +95,7 @@ http://<your-server-ip>:8090
 ### `proxy-web-ui` Options
 In `docker-compose.yml`:
 * `PORT`: Port the web dashboard listens on (default: `8080`).
-* `SERVERS_FILE`: Path to `custom_servers.json` inside the container (default: `/data/custom_servers.json`).
+* `SERVERS_FILE`: Path to `custom_servers.json` inside the container (default: `/config/custom_servers.json`).
 * `TARGET_CONTAINER`: Name of the proxy container to manage (default: `bedrock-proxy`).
 * `ADMIN_PASSWORD`: *(Optional)* Set a password to require login before saving changes or restarting.
 

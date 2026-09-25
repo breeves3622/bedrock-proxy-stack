@@ -13,7 +13,7 @@ services:
     # discovery so console/mobile/PC clients see the game in the Friends tab.
     network_mode: host
     environment:
-      - BC_CUSTOM_SERVERS=/custom_servers.json
+      - BC_CUSTOM_SERVERS=/config/custom_servers.json
       - BC_USER_SERVERS=true
       - BC_SERVER_LIMIT=50
       - BC_DB_TYPE=none
@@ -22,7 +22,7 @@ services:
       - BC_KICK_INACTIVE=true
       - BC_ONLINE_MODE=true
     volumes:
-      - ./custom_servers.json:/custom_servers.json
+      - ./config:/config
       - ./players:/players
 
   # -------------------------------------------------------------------------
@@ -37,13 +37,13 @@ services:
       - "8090:8080"
     environment:
       - PORT=8080
-      - SERVERS_FILE=/data/custom_servers.json
+      - SERVERS_FILE=/config/custom_servers.json
       - TARGET_CONTAINER=bedrock-proxy
       # Optional: set a password to protect the web dashboard (leave empty for none)
       - ADMIN_PASSWORD=
     volumes:
-      # Mount the server list so the web UI can read and write updates
-      - ./custom_servers.json:/data/custom_servers.json
+      # Mount config folder so web UI can read and write custom_servers.json
+      - ./config:/config
       # Mount Docker socket to allow status check, restart, and log streaming
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
