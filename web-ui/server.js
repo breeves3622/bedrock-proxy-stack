@@ -341,18 +341,21 @@ const server = http.createServer(async (req, res) => {
         let rawLogs = typeof logRes.body === 'string' ? logRes.body : ''
         logs = rawLogs.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '')
 
-        const linkMatch = logs.match(/https?:\/\/(?:www\.)?microsoft\.com\/link/i)
-        const codeMatch = logs.match(/(?:code|enter)[:\s]+([A-Z0-9]{8,10})/i) || logs.match(/\b([A-Z0-9]{4}-[A-Z0-9]{4})\b/)
+        // Try extracting gamertag from logs
+        const tagMatch = logs.match(/(?:Account linked|Logged in as|Broadcasting as|Gamertag)[:\s]+([A-Za-z0-9_ #]+)/i)
+        if (tagMatch) detectedGamertag = tagMatch[1].trim()
 
-        if (linkMatch && codeMatch) {
+        const isLinkedOrBroadcasting = Boolean(
+          detectedGamertag ||
+          /Account linked|Xbox Broadcast:\s*Ready|Creating Xbox LIVE session|Session is now active|Broadcasting as|Logged in as/i.test(logs)
+        )
+
+        // Only mark authRequired if the prompt exists AND we are not yet linked/broadcasting
+        if (linkMatch && codeMatch && !isLinkedOrBroadcasting) {
           authRequired = true
           authUrl = linkMatch[0]
           authCode = codeMatch[1]
         }
-
-        // Try extracting gamertag from logs
-        const tagMatch = logs.match(/(?:Logged in as|Broadcasting as|Gamertag)[:\s]+([A-Za-z0-9_ #]+)/i)
-        if (tagMatch) detectedGamertag = tagMatch[1].trim()
       }
 
       // Read saved config or custom gamertag file
