@@ -106,8 +106,19 @@ The web UI controls the proxy via `/var/run/docker.sock`. Ensure `/var/run/docke
 
 ## 🎮 How Players Connect on Bedrock
 
-1. Make sure your device (PlayStation, Xbox, Mobile, PC) is connected to the same Wi-Fi / LAN network.
-2. Open Minecraft Bedrock Edition.
-3. Go to the **Friends** tab (or **Worlds** tab depending on platform).
-4. Look under **LAN Games** — you will see **My Bedrock Proxy**.
-5. Tap to join. You will be greeted with the custom server selection menu!
+### Option 1: Via LAN Games (Local Network)
+1. Ensure your device (PlayStation, Xbox, Switch, Mobile, PC) is connected to the same Wi-Fi / LAN network.
+2. Open Minecraft Bedrock Edition ➡️ **Friends** tab ➡️ Scroll to **LAN Games**.
+3. Select **My Bedrock Proxy** to open your custom server menu.
+
+---
+
+### Option 2: Via Xbox Live Friend Broadcaster (Internet & Consoles)
+Using the integrated `mcxboxbroadcast` service:
+1. Open the Web Dashboard at `http://<server-ip>:8090` (or check Portainer logs for `mcxboxbroadcast`).
+2. Link a spare/alt Microsoft account by visiting [https://www.microsoft.com/link](https://www.microsoft.com/link) and entering the 8-character code shown on the dashboard.
+3. In `xbox-config/config.yml`, set the `ip:` to your server's IP address (local IP for home use, or your Public IP / DDNS domain for friends playing over the internet).
+4. **How friends join:**
+   - Have your friends add your broadcaster bot's Xbox Gamertag as a friend.
+   - When the bot is online, your friends will see it playing in their **Friends tab** under **Joinable Cross-Platform Friends**.
+   - Clicking to join the friend connects them straight into the Bedrock proxy menu from ANY console or device without changing any DNS or router settings!

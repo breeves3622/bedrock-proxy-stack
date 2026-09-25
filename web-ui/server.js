@@ -6,6 +6,8 @@ const dgram = require('dgram')
 const PORT = parseInt(process.env.PORT || '8080', 10)
 const SERVERS_FILE = process.env.SERVERS_FILE || path.join(__dirname, 'custom_servers.json')
 const TARGET_CONTAINER = process.env.TARGET_CONTAINER || 'bedrock-proxy'
+const XBOX_CONTAINER = process.env.XBOX_CONTAINER || 'mcxboxbroadcast'
+const XBOX_CONFIG_DIR = process.env.XBOX_CONFIG_DIR || '/xbox-config'
 const DOCKER_SOCKET = process.env.DOCKER_SOCKET || '/var/run/docker.sock'
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ''
 
@@ -318,9 +320,100 @@ const server = http.createServer(async (req, res) => {
 
       // Clean Docker multiplex headers if present
       let rawLogs = typeof result.body === 'string' ? result.body : ''
-      // Remove binary header characters produced by Docker multiplex stream
       const cleanLogs = rawLogs.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '')
       return sendJson({ logs: cleanLogs })
+    }
+
+    // 9. Xbox Broadcaster Status
+    if (url.pathname === '/api/xbox/status' && req.method === 'GET') {
+      const inspect = await dockerRequest(`/containers/${XBOX_CONTAINER}/json`)
+      if (inspect.error) {
+        return sendJson({
+          container: XBOX_CONTAINER,
+          running: false,
+          status: 'not_found',
+          error: inspect.error
+        })
+      }
+
+      const state = inspect.body.State || {}
+      return sendJson({
+        container: XBOX_CONTAINER,
+        running: state.Running || false,
+        status: state.Status || 'stopped',
+        startedAt: state.StartedAt,
+        restartCount: inspect.body.RestartCount || 0
+      })
+    }
+
+    // 10. Xbox Broadcaster Logs & Auth Code Detection
+    if (url.pathname === '/api/xbox/logs' && req.method === 'GET') {
+      const tail = parseInt(url.searchParams.get('tail') || '100', 10)
+      const result = await dockerRequest(`/containers/${XBOX_CONTAINER}/logs?stdout=1&stderr=1&tail=${tail}`)
+      if (result.error) {
+        return sendJson({ error: result.error }, 500)
+      }
+
+      let rawLogs = typeof result.body === 'string' ? result.body : ''
+      const cleanLogs = rawLogs.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '')
+
+      // Check if Microsoft link code is present in logs
+      // Format usually: "https://www.microsoft.com/link and enter code XXXXXXXX"
+      let authCode = null
+      let authUrl = null
+      const linkMatch = cleanLogs.match(/https?:\/\/(?:www\.)?microsoft\.com\/link/i)
+      const codeMatch = cleanLogs.match(/(?:code|enter)[:\s]+([A-Z0-9]{8,10})/i) || cleanLogs.match(/\b([A-Z0-9]{4}-[A-Z0-9]{4})\b/)
+
+      if (linkMatch) authUrl = linkMatch[0]
+      if (codeMatch) authCode = codeMatch[1]
+
+      return sendJson({
+        logs: cleanLogs,
+        authRequired: Boolean(authUrl && authCode),
+        authUrl,
+        authCode
+      })
+    }
+
+    // 11. Restart Xbox Broadcaster Container
+    if (url.pathname === '/api/xbox/restart' && req.method === 'POST') {
+      const result = await dockerRequest(`/containers/${XBOX_CONTAINER}/restart`, 'POST')
+      if (result.error) {
+        return sendJson({ success: false, error: result.error }, 500)
+      }
+      return sendJson({ success: true, message: `Container ${XBOX_CONTAINER} restarted successfully` })
+    }
+
+    // 12. Read Xbox Broadcaster config.yml
+    if (url.pathname === '/api/xbox/config' && req.method === 'GET') {
+      const configPath = path.join(XBOX_CONFIG_DIR, 'config.yml')
+      if (fs.existsSync(configPath)) {
+        try {
+          const content = fs.readFileSync(configPath, 'utf8')
+          return sendJson({ exists: true, content })
+        } catch (e) {
+          return sendJson({ exists: false, error: e.message })
+        }
+      }
+      return sendJson({ exists: false, message: 'config.yml not generated yet (starts upon first login)' })
+    }
+
+    // 13. Save Xbox Broadcaster config.yml
+    if (url.pathname === '/api/xbox/config' && req.method === 'POST') {
+      const configPath = path.join(XBOX_CONFIG_DIR, 'config.yml')
+      let body = ''
+      req.on('data', chunk => body += chunk)
+      req.on('end', () => {
+        try {
+          const { content } = JSON.parse(body)
+          if (typeof content !== 'string') return sendJson({ error: 'content must be a string' }, 400)
+          fs.writeFileSync(configPath, content, 'utf8')
+          return sendJson({ success: true })
+        } catch (e) {
+          return sendJson({ error: e.message }, 400)
+        }
+      })
+      return
     }
 
     return sendJson({ error: 'Not found' }, 404)

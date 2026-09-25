@@ -112,6 +112,44 @@
       </div>
     </div>
 
+    <!-- Xbox Live Friend Broadcaster Card (mcxboxbroadcast) -->
+    <div class="card" style="border-left: 4px solid #10b981;">
+      <div class="status-bar">
+        <div>
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <h3 style="font-size: 1.1rem; display:flex; align-items:center; gap:6px;">🎮 Xbox Live Friend Broadcaster</h3>
+            <div class="status-badge" style="padding: 2px 10px; font-size: 0.8rem;">
+              <span class="status-dot" id="xboxDot"></span>
+              <span id="xboxStatusText">Checking...</span>
+            </div>
+          </div>
+          <div class="subtitle" style="margin-top: 4px;">
+            Broadcasts your proxy as a joinable friend on Xbox Live so friends can join from their Friends tab (No LAN or DNS required!)
+          </div>
+        </div>
+        <div style="display:flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="openXboxLogsModal()">📜 Xbox Logs</button>
+          <button class="btn btn-danger btn-sm" id="btnRestartXbox" onclick="restartXbox()">⚡ Restart Bot</button>
+        </div>
+      </div>
+
+      <!-- Xbox Auth Code Alert (Shown when login is required) -->
+      <div id="xboxAuthBanner" style="display:none; margin-top: 16px; background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning); border-radius: 6px; padding: 12px 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <strong style="color: var(--warning);">🔑 Microsoft Account Link Required!</strong>
+            <div style="font-size: 0.88rem; margin-top: 4px; color: var(--text);">
+              Open <a id="xboxAuthUrlLink" href="https://www.microsoft.com/link" target="_blank" style="color: var(--primary); text-decoration: underline;">https://www.microsoft.com/link</a> and enter code:
+              <span id="xboxAuthCodeDisplay" style="font-family: monospace; font-size: 1.1rem; font-weight: bold; background: #000; padding: 2px 8px; border-radius: 4px; margin-left: 6px; color: #38bdf8;"></span>
+            </div>
+          </div>
+          <div>
+            <a id="xboxAuthBtn" href="https://www.microsoft.com/link" target="_blank" class="btn btn-primary btn-sm">🔗 Open Login Page</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Server List Management Card -->
     <div class="card">
       <div class="server-list-header">
@@ -166,7 +204,7 @@
     </div>
   </div>
 
-  <!-- Logs Modal -->
+  <!-- Logs Modal (Proxy) -->
   <div class="modal-backdrop" id="logsModal">
     <div class="modal" style="max-width: 750px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -176,6 +214,20 @@
       <div class="logs-box" id="logsContent">Loading logs...</div>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeLogsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs Modal (Xbox Broadcaster) -->
+  <div class="modal-backdrop" id="xboxLogsModal">
+    <div class="modal" style="max-width: 750px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 class="modal-title" style="margin: 0;">📜 Xbox Live Broadcaster Logs</h3>
+        <button class="btn btn-secondary btn-sm" onclick="fetchXboxLogs()">🔄 Refresh</button>
+      </div>
+      <div class="logs-box" id="xboxLogsContent">Loading logs...</div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeXboxLogsModal()">Close</button>
       </div>
     </div>
   </div>
@@ -490,6 +542,91 @@
       }
     }
 
+    async function checkXboxStatus() {
+      const dot = document.getElementById('xboxDot');
+      const text = document.getElementById('xboxStatusText');
+      const banner = document.getElementById('xboxAuthBanner');
+
+      try {
+        const data = await apiRequest('/api/xbox/status');
+        if (data.running) {
+          // Check logs for auth requirement
+          const logsData = await apiRequest('/api/xbox/logs?tail=50');
+          if (logsData.authRequired && logsData.authCode) {
+            dot.className = 'status-dot restarting';
+            text.textContent = 'Action Required: Sign In';
+            banner.style.display = 'block';
+            document.getElementById('xboxAuthCodeDisplay').textContent = logsData.authCode;
+            document.getElementById('xboxAuthUrlLink').href = logsData.authUrl || 'https://www.microsoft.com/link';
+            document.getElementById('xboxAuthBtn').href = logsData.authUrl || 'https://www.microsoft.com/link';
+          } else {
+            dot.className = 'status-dot online';
+            text.textContent = `Broadcasting on Xbox Live (${data.status})`;
+            banner.style.display = 'none';
+          }
+        } else if (data.status === 'restarting') {
+          dot.className = 'status-dot restarting';
+          text.textContent = 'Restarting...';
+        } else {
+          dot.className = 'status-dot stopped';
+          text.textContent = `Inactive (${data.status})`;
+          banner.style.display = 'none';
+        }
+      } catch (e) {
+        dot.className = 'status-dot stopped';
+        text.textContent = 'Not Available';
+        banner.style.display = 'none';
+      }
+    }
+
+    async function restartXbox() {
+      if (!confirm('Restart the Xbox Live Friend Broadcaster?')) return;
+      const btn = document.getElementById('btnRestartXbox');
+      btn.disabled = true;
+      btn.textContent = '⚡ Restarting...';
+
+      try {
+        const res = await apiRequest('/api/xbox/restart', 'POST');
+        if (res.success) {
+          showToast('Xbox Broadcaster restarted!', 'success');
+          setTimeout(checkXboxStatus, 2500);
+        } else {
+          showToast('Restart failed: ' + (res.error || ''), 'danger');
+        }
+      } catch (e) {
+        showToast('Error requesting restart', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⚡ Restart Bot';
+      }
+    }
+
+    async function openXboxLogsModal() {
+      document.getElementById('xboxLogsModal').classList.add('open');
+      fetchXboxLogs();
+    }
+
+    function closeXboxLogsModal() {
+      document.getElementById('xboxLogsModal').classList.remove('open');
+    }
+
+    async function fetchXboxLogs() {
+      const box = document.getElementById('xboxLogsContent');
+      box.textContent = 'Fetching Xbox broadcaster logs...';
+      try {
+        const res = await apiRequest('/api/xbox/logs?tail=100');
+        if (res.logs) {
+          box.textContent = res.logs || '(No logs yet)';
+          box.scrollTop = box.scrollHeight;
+          if (res.authRequired) checkXboxStatus();
+        } else {
+          box.textContent = res.error || 'Failed to retrieve logs.';
+        }
+      } catch (e) {
+        box.textContent = 'Error connecting to Docker API.';
+      }
+    }
+
     function escapeHtml(str) {
       return String(str)
         .replace(/&/g, '&amp;')
@@ -501,7 +638,9 @@
     // Initialize
     loadServers();
     checkProxyStatus();
+    checkXboxStatus();
     setInterval(checkProxyStatus, 10000);
+    setInterval(checkXboxStatus, 15000);
   </script>
 </body>
 </html>

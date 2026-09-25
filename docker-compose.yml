@@ -39,12 +39,31 @@ services:
       - PORT=8080
       - SERVERS_FILE=/config/custom_servers.json
       - TARGET_CONTAINER=bedrock-proxy
+      - XBOX_CONTAINER=mcxboxbroadcast
+      - XBOX_CONFIG_DIR=/xbox-config
       # Optional: set a password to protect the web dashboard (leave empty for none)
       - ADMIN_PASSWORD=
     volumes:
       # Mount config folder so web UI can read and write custom_servers.json
       - ./config:/config
+      # Mount xbox config folder for broadcaster settings
+      - ./xbox-config:/xbox-config
       # Mount Docker socket to allow status check, restart, and log streaming
       - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - bedrock-proxy
+
+  # -------------------------------------------------------------------------
+  # 3. Xbox Live Friend Broadcaster (MCXboxBroadcast)
+  #    Broadcasts proxy as a joinable Xbox Live friend world (across internet & LAN)
+  # -------------------------------------------------------------------------
+  mcxboxbroadcast:
+    image: ghcr.io/mcxboxbroadcast/standalone:latest
+    container_name: mcxboxbroadcast
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./xbox-config:/opt/app/config
     depends_on:
       - bedrock-proxy
