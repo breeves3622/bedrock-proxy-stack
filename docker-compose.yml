@@ -60,6 +60,7 @@ services:
   mcxboxbroadcast:
     image: ghcr.io/mcxboxbroadcast/standalone:latest
     container_name: mcxboxbroadcast
+    user: root
     restart: unless-stopped
     stdin_open: true
     tty: true

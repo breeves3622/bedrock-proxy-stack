@@ -513,4 +513,16 @@ server.listen(PORT, () => {
   console.log(`[Bedrock Proxy Web UI] Running on http://0.0.0.0:${PORT}`)
   console.log(`[Bedrock Proxy Web UI] Target servers file: ${SERVERS_FILE}`)
   console.log(`[Bedrock Proxy Web UI] Target container: ${TARGET_CONTAINER}`)
+
+  // Ensure directories exist with proper write permissions for all containers
+  try {
+    const serverDir = path.dirname(SERVERS_FILE)
+    if (!fs.existsSync(serverDir)) fs.mkdirSync(serverDir, { recursive: true })
+    fs.chmodSync(serverDir, 0o777)
+  } catch (e) {}
+
+  try {
+    if (!fs.existsSync(XBOX_CONFIG_DIR)) fs.mkdirSync(XBOX_CONFIG_DIR, { recursive: true })
+    fs.chmodSync(XBOX_CONFIG_DIR, 0o777)
+  } catch (e) {}
 })
