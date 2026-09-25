@@ -324,29 +324,86 @@ const server = http.createServer(async (req, res) => {
       return sendJson({ logs: cleanLogs })
     }
 
-    // 9. Xbox Broadcaster Status
-    if (url.pathname === '/api/xbox/status' && req.method === 'GET') {
+    // 9. Detailed Xbox Broadcaster Status & Join Links
+    if (url.pathname === '/api/xbox/details' && req.method === 'GET') {
       const inspect = await dockerRequest(`/containers/${XBOX_CONTAINER}/json`)
-      if (inspect.error) {
-        return sendJson({
-          container: XBOX_CONTAINER,
-          running: false,
-          status: 'not_found',
-          error: inspect.error
-        })
+      const isRunning = inspect.body?.State?.Running || false
+      const status = inspect.body?.State?.Status || 'stopped'
+
+      let logs = ''
+      let authRequired = false
+      let authUrl = null
+      let authCode = null
+      let detectedGamertag = ''
+
+      if (isRunning) {
+        const logRes = await dockerRequest(`/containers/${XBOX_CONTAINER}/logs?stdout=1&stderr=1&tail=150`)
+        let rawLogs = typeof logRes.body === 'string' ? logRes.body : ''
+        logs = rawLogs.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '')
+
+        const linkMatch = logs.match(/https?:\/\/(?:www\.)?microsoft\.com\/link/i)
+        const codeMatch = logs.match(/(?:code|enter)[:\s]+([A-Z0-9]{8,10})/i) || logs.match(/\b([A-Z0-9]{4}-[A-Z0-9]{4})\b/)
+
+        if (linkMatch && codeMatch) {
+          authRequired = true
+          authUrl = linkMatch[0]
+          authCode = codeMatch[1]
+        }
+
+        // Try extracting gamertag from logs
+        const tagMatch = logs.match(/(?:Logged in as|Broadcasting as|Gamertag)[:\s]+([A-Za-z0-9_ #]+)/i)
+        if (tagMatch) detectedGamertag = tagMatch[1].trim()
       }
 
-      const state = inspect.body.State || {}
+      // Read saved config or custom gamertag file
+      let savedGamertag = ''
+      const tagFile = path.join(XBOX_CONFIG_DIR, 'gamertag.txt')
+      if (fs.existsSync(tagFile)) {
+        try { savedGamertag = fs.readFileSync(tagFile, 'utf8').trim() } catch(e) {}
+      }
+      const gamertag = savedGamertag || detectedGamertag || ''
+
+      // Read IP & Port from config.yml if available
+      let ip = ''
+      let port = 19132
+      const configPath = path.join(XBOX_CONFIG_DIR, 'config.yml')
+      if (fs.existsSync(configPath)) {
+        try {
+          const content = fs.readFileSync(configPath, 'utf8')
+          const ipMatch = content.match(/ip:\s*["']?([^"'\r\n]+)["']?/)
+          const portMatch = content.match(/port:\s*([0-9]+)/)
+          if (ipMatch) ip = ipMatch[1].trim()
+          if (portMatch) port = parseInt(portMatch[1].trim(), 10)
+        } catch(e) {}
+      }
+
+      // Generate join links
+      const xboxProfileUrl = gamertag ? `https://account.xbox.com/Profile?gamerTag=${encodeURIComponent(gamertag)}` : ''
+      const directJoinUri = ip ? `minecraft://?addExternalServer=${encodeURIComponent('Bedrock Proxy')}|${ip}:${port}` : ''
+      const shareMessage = gamertag 
+        ? `Join my Minecraft server from console, mobile, or PC without DNS hacks!\n1. Add Xbox friend: ${gamertag}\n2. Open Minecraft -> Friends Tab -> Join!\n(Direct profile: ${xboxProfileUrl})`
+        : `Join my Minecraft server via Bedrock Proxy!`
+
       return sendJson({
         container: XBOX_CONTAINER,
-        running: state.Running || false,
-        status: state.Status || 'stopped',
-        startedAt: state.StartedAt,
-        restartCount: inspect.body.RestartCount || 0
+        running: isRunning,
+        status,
+        startedAt: inspect.body?.State?.StartedAt,
+        authRequired,
+        authUrl,
+        authCode,
+        gamertag,
+        ip,
+        port,
+        joinLinks: {
+          xboxProfileUrl,
+          directJoinUri,
+          shareMessage
+        }
       })
     }
 
-    // 10. Xbox Broadcaster Logs & Auth Code Detection
+    // 10. Xbox Broadcaster Logs
     if (url.pathname === '/api/xbox/logs' && req.method === 'GET') {
       const tail = parseInt(url.searchParams.get('tail') || '100', 10)
       const result = await dockerRequest(`/containers/${XBOX_CONTAINER}/logs?stdout=1&stderr=1&tail=${tail}`)
@@ -356,23 +413,7 @@ const server = http.createServer(async (req, res) => {
 
       let rawLogs = typeof result.body === 'string' ? result.body : ''
       const cleanLogs = rawLogs.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '')
-
-      // Check if Microsoft link code is present in logs
-      // Format usually: "https://www.microsoft.com/link and enter code XXXXXXXX"
-      let authCode = null
-      let authUrl = null
-      const linkMatch = cleanLogs.match(/https?:\/\/(?:www\.)?microsoft\.com\/link/i)
-      const codeMatch = cleanLogs.match(/(?:code|enter)[:\s]+([A-Z0-9]{8,10})/i) || cleanLogs.match(/\b([A-Z0-9]{4}-[A-Z0-9]{4})\b/)
-
-      if (linkMatch) authUrl = linkMatch[0]
-      if (codeMatch) authCode = codeMatch[1]
-
-      return sendJson({
-        logs: cleanLogs,
-        authRequired: Boolean(authUrl && authCode),
-        authUrl,
-        authCode
-      })
+      return sendJson({ logs: cleanLogs })
     }
 
     // 11. Restart Xbox Broadcaster Container
@@ -384,36 +425,74 @@ const server = http.createServer(async (req, res) => {
       return sendJson({ success: true, message: `Container ${XBOX_CONTAINER} restarted successfully` })
     }
 
-    // 12. Read Xbox Broadcaster config.yml
-    if (url.pathname === '/api/xbox/config' && req.method === 'GET') {
-      const configPath = path.join(XBOX_CONFIG_DIR, 'config.yml')
-      if (fs.existsSync(configPath)) {
-        try {
-          const content = fs.readFileSync(configPath, 'utf8')
-          return sendJson({ exists: true, content })
-        } catch (e) {
-          return sendJson({ exists: false, error: e.message })
-        }
-      }
-      return sendJson({ exists: false, message: 'config.yml not generated yet (starts upon first login)' })
-    }
-
-    // 13. Save Xbox Broadcaster config.yml
-    if (url.pathname === '/api/xbox/config' && req.method === 'POST') {
-      const configPath = path.join(XBOX_CONFIG_DIR, 'config.yml')
+    // 12. Save Broadcaster Settings (IP, Port, Gamertag)
+    if (url.pathname === '/api/xbox/save-settings' && req.method === 'POST') {
       let body = ''
       req.on('data', chunk => body += chunk)
-      req.on('end', () => {
+      req.on('end', async () => {
         try {
-          const { content } = JSON.parse(body)
-          if (typeof content !== 'string') return sendJson({ error: 'content must be a string' }, 400)
-          fs.writeFileSync(configPath, content, 'utf8')
-          return sendJson({ success: true })
+          const { ip, port, gamertag, restart } = JSON.parse(body)
+          if (!fs.existsSync(XBOX_CONFIG_DIR)) {
+            fs.mkdirSync(XBOX_CONFIG_DIR, { recursive: true })
+          }
+
+          if (gamertag !== undefined) {
+            fs.writeFileSync(path.join(XBOX_CONFIG_DIR, 'gamertag.txt'), String(gamertag).trim(), 'utf8')
+          }
+
+          // Update config.yml
+          const configPath = path.join(XBOX_CONFIG_DIR, 'config.yml')
+          let configContent = fs.existsSync(configPath) ? fs.readFileSync(configPath, 'utf8') : ''
+          
+          if (!configContent) {
+            configContent = `sessionInfo:\n  host-name: "Bedrock Proxy"\n  world-name: "Custom Server Selection"\n  ip: "${ip || '127.0.0.1'}"\n  port: ${port || 19132}\n`
+          } else {
+            if (ip) {
+              if (/ip:\s*.*/.test(configContent)) {
+                configContent = configContent.replace(/ip:\s*.*/, `ip: "${ip}"`)
+              } else {
+                configContent += `\n  ip: "${ip}"`
+              }
+            }
+            if (port) {
+              if (/port:\s*.*/.test(configContent)) {
+                configContent = configContent.replace(/port:\s*.*/, `port: ${port}`)
+              } else {
+                configContent += `\n  port: ${port}`
+              }
+            }
+          }
+          fs.writeFileSync(configPath, configContent, 'utf8')
+
+          if (restart) {
+            await dockerRequest(`/containers/${XBOX_CONTAINER}/restart`, 'POST')
+          }
+
+          return sendJson({ success: true, message: 'Settings saved successfully' })
         } catch (e) {
           return sendJson({ error: e.message }, 400)
         }
       })
       return
+    }
+
+    // 13. Re-authenticate / Reset Xbox Broadcaster Session
+    if (url.pathname === '/api/xbox/reauth' && req.method === 'POST') {
+      try {
+        if (fs.existsSync(XBOX_CONFIG_DIR)) {
+          const files = fs.readdirSync(XBOX_CONFIG_DIR)
+          for (const file of files) {
+            // Delete token and cache files to force new login prompt
+            if (file.toLowerCase().includes('token') || file.toLowerCase().includes('auth') || file.endsWith('.cache')) {
+              try { fs.unlinkSync(path.join(XBOX_CONFIG_DIR, file)) } catch(err) {}
+            }
+          }
+        }
+        await dockerRequest(`/containers/${XBOX_CONTAINER}/restart`, 'POST')
+        return sendJson({ success: true, message: 'Cleared login tokens and restarted broadcaster' })
+      } catch (e) {
+        return sendJson({ error: e.message }, 500)
+      }
     }
 
     return sendJson({ error: 'Not found' }, 404)

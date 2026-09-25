@@ -127,24 +127,49 @@
             Broadcasts your proxy as a joinable friend on Xbox Live so friends can join from their Friends tab (No LAN or DNS required!)
           </div>
         </div>
-        <div style="display:flex; gap: 8px;">
-          <button class="btn btn-secondary btn-sm" onclick="openXboxLogsModal()">📜 Xbox Logs</button>
+        <div style="display:flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="openXboxSettingsModal()">⚙️ Broadcaster Setup</button>
+          <button class="btn btn-secondary btn-sm" onclick="openXboxLogsModal()">📜 Logs</button>
+          <button class="btn btn-secondary btn-sm" onclick="reauthXbox()" title="Clear login and get new link code">🔄 Re-auth</button>
           <button class="btn btn-danger btn-sm" id="btnRestartXbox" onclick="restartXbox()">⚡ Restart Bot</button>
         </div>
       </div>
 
       <!-- Xbox Auth Code Alert (Shown when login is required) -->
-      <div id="xboxAuthBanner" style="display:none; margin-top: 16px; background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning); border-radius: 6px; padding: 12px 16px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <div id="xboxAuthBanner" style="display:none; margin-top: 16px; background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning); border-radius: 6px; padding: 14px 18px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
           <div>
-            <strong style="color: var(--warning);">🔑 Microsoft Account Link Required!</strong>
-            <div style="font-size: 0.88rem; margin-top: 4px; color: var(--text);">
-              Open <a id="xboxAuthUrlLink" href="https://www.microsoft.com/link" target="_blank" style="color: var(--primary); text-decoration: underline;">https://www.microsoft.com/link</a> and enter code:
-              <span id="xboxAuthCodeDisplay" style="font-family: monospace; font-size: 1.1rem; font-weight: bold; background: #000; padding: 2px 8px; border-radius: 4px; margin-left: 6px; color: #38bdf8;"></span>
+            <strong style="color: var(--warning); font-size: 1rem;">🔑 Microsoft Account Link Required!</strong>
+            <div style="font-size: 0.9rem; margin-top: 6px; color: var(--text);">
+              1. Open <a id="xboxAuthUrlLink" href="https://www.microsoft.com/link" target="_blank" style="color: var(--primary); text-decoration: underline; font-weight:600;">https://www.microsoft.com/link</a><br>
+              2. Enter code:
+              <span id="xboxAuthCodeDisplay" style="font-family: monospace; font-size: 1.2rem; font-weight: bold; background: #000; padding: 3px 10px; border-radius: 4px; margin-left: 6px; color: #38bdf8; letter-spacing: 1px;"></span>
             </div>
           </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="copyAuthCode()">📋 Copy Code</button>
+            <a id="xboxAuthBtn" href="https://www.microsoft.com/link" target="_blank" class="btn btn-primary btn-sm">🔗 Open Microsoft Login</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Join Links & Share Section (Shown when active) -->
+      <div id="xboxJoinSection" style="margin-top: 16px; padding: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div>
-            <a id="xboxAuthBtn" href="https://www.microsoft.com/link" target="_blank" class="btn btn-primary btn-sm">🔗 Open Login Page</a>
+            <div style="display:flex; align-items:center; gap: 8px;">
+              <span style="font-size:0.85rem; color:var(--text-muted);">Bot Gamertag:</span>
+              <strong id="xboxGamertagDisplay" style="color:var(--primary); font-size: 1rem;">Not set</strong>
+              <span id="xboxAdvertisedIp" style="font-size:0.8rem; color:var(--text-muted); font-family:monospace; margin-left: 8px;"></span>
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+              Share this gamertag with friends. Once added, your proxy appears directly in their Minecraft <strong>Friends</strong> list!
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a id="xboxProfileBtn" href="#" target="_blank" class="btn btn-secondary btn-sm" style="display:none;">👤 Add on Xbox</a>
+            <button class="btn btn-primary btn-sm" onclick="copyInviteMessage()">📋 Copy Invite for Friends</button>
+            <a id="minecraftDirectBtn" href="#" class="btn btn-secondary btn-sm" style="display:none;">📱 One-Tap Bedrock Join</a>
           </div>
         </div>
       </div>
@@ -228,6 +253,31 @@
       <div class="logs-box" id="xboxLogsContent">Loading logs...</div>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeXboxLogsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Xbox Broadcaster Setup & Settings Modal -->
+  <div class="modal-backdrop" id="xboxSettingsModal">
+    <div class="modal">
+      <h3 class="modal-title">⚙️ Xbox Broadcaster Setup</h3>
+      <div class="form-group">
+        <label>Advertised IP or Domain (Where friends connect)</label>
+        <input type="text" class="form-control" id="xboxSettingIp" placeholder="e.g. 192.168.1.100 (LAN) or play.mydomain.com (Internet)">
+        <span style="font-size:0.78rem; color:var(--text-muted); margin-top:3px; display:block;">Use your local IP for LAN play, or your Public IP / DDNS for internet friends.</span>
+      </div>
+      <div class="form-group">
+        <label>Advertised Bedrock Port (Default 19132)</label>
+        <input type="number" class="form-control" id="xboxSettingPort" value="19132">
+      </div>
+      <div class="form-group">
+        <label>Bot Xbox Gamertag (Account used to broadcast)</label>
+        <input type="text" class="form-control" id="xboxSettingGamertag" placeholder="e.g. MyServerBot">
+        <span style="font-size:0.78rem; color:var(--text-muted); margin-top:3px; display:block;">Used to generate direct Xbox Add-Friend links for players.</span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeXboxSettingsModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveXboxSettings(true)">🚀 Save & Restart Bot</button>
       </div>
     </div>
   </div>
@@ -542,28 +592,54 @@
       }
     }
 
+    let currentXboxDetails = null;
+
     async function checkXboxStatus() {
       const dot = document.getElementById('xboxDot');
       const text = document.getElementById('xboxStatusText');
       const banner = document.getElementById('xboxAuthBanner');
+      const gamertagEl = document.getElementById('xboxGamertagDisplay');
+      const advertisedIpEl = document.getElementById('xboxAdvertisedIp');
+      const profileBtn = document.getElementById('xboxProfileBtn');
+      const minecraftBtn = document.getElementById('minecraftDirectBtn');
 
       try {
-        const data = await apiRequest('/api/xbox/status');
+        const data = await apiRequest('/api/xbox/details');
+        currentXboxDetails = data;
+
         if (data.running) {
-          // Check logs for auth requirement
-          const logsData = await apiRequest('/api/xbox/logs?tail=50');
-          if (logsData.authRequired && logsData.authCode) {
+          if (data.authRequired && data.authCode) {
             dot.className = 'status-dot restarting';
             text.textContent = 'Action Required: Sign In';
             banner.style.display = 'block';
-            document.getElementById('xboxAuthCodeDisplay').textContent = logsData.authCode;
-            document.getElementById('xboxAuthUrlLink').href = logsData.authUrl || 'https://www.microsoft.com/link';
-            document.getElementById('xboxAuthBtn').href = logsData.authUrl || 'https://www.microsoft.com/link';
+            document.getElementById('xboxAuthCodeDisplay').textContent = data.authCode;
+            document.getElementById('xboxAuthUrlLink').href = data.authUrl || 'https://www.microsoft.com/link';
+            document.getElementById('xboxAuthBtn').href = data.authUrl || 'https://www.microsoft.com/link';
           } else {
             dot.className = 'status-dot online';
-            text.textContent = `Broadcasting on Xbox Live (${data.status})`;
+            text.textContent = `Broadcasting Live (${data.status})`;
             banner.style.display = 'none';
           }
+
+          // Gamertag & Join Links
+          if (data.gamertag) {
+            gamertagEl.textContent = data.gamertag;
+            profileBtn.href = data.joinLinks?.xboxProfileUrl || '#';
+            profileBtn.style.display = 'inline-flex';
+          } else {
+            gamertagEl.textContent = '(Not configured yet - click Broadcaster Setup)';
+            profileBtn.style.display = 'none';
+          }
+
+          if (data.ip) {
+            advertisedIpEl.textContent = `(${data.ip}:${data.port || 19132})`;
+            minecraftBtn.href = data.joinLinks?.directJoinUri || '#';
+            minecraftBtn.style.display = 'inline-flex';
+          } else {
+            advertisedIpEl.textContent = '';
+            minecraftBtn.style.display = 'none';
+          }
+
         } else if (data.status === 'restarting') {
           dot.className = 'status-dot restarting';
           text.textContent = 'Restarting...';
@@ -576,6 +652,68 @@
         dot.className = 'status-dot stopped';
         text.textContent = 'Not Available';
         banner.style.display = 'none';
+      }
+    }
+
+    function copyAuthCode() {
+      const code = document.getElementById('xboxAuthCodeDisplay').textContent.trim();
+      if (!code) return;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast(`Copied code "${code}" to clipboard!`, 'success');
+      });
+    }
+
+    function copyInviteMessage() {
+      const message = currentXboxDetails?.joinLinks?.shareMessage || 'Join our Minecraft server via Bedrock Proxy!';
+      navigator.clipboard.writeText(message).then(() => {
+        showToast('Copied friend invite instructions to clipboard!', 'success');
+      });
+    }
+
+    function openXboxSettingsModal() {
+      if (currentXboxDetails) {
+        document.getElementById('xboxSettingIp').value = currentXboxDetails.ip || '';
+        document.getElementById('xboxSettingPort').value = currentXboxDetails.port || 19132;
+        document.getElementById('xboxSettingGamertag').value = currentXboxDetails.gamertag || '';
+      }
+      document.getElementById('xboxSettingsModal').classList.add('open');
+    }
+
+    function closeXboxSettingsModal() {
+      document.getElementById('xboxSettingsModal').classList.remove('open');
+    }
+
+    async function saveXboxSettings(restart = true) {
+      const ip = document.getElementById('xboxSettingIp').value.trim();
+      const port = parseInt(document.getElementById('xboxSettingPort').value.trim(), 10) || 19132;
+      const gamertag = document.getElementById('xboxSettingGamertag').value.trim();
+
+      try {
+        const res = await apiRequest('/api/xbox/save-settings', 'POST', { ip, port, gamertag, restart });
+        if (res.success) {
+          showToast('Broadcaster settings saved!', 'success');
+          closeXboxSettingsModal();
+          setTimeout(checkXboxStatus, 2500);
+        } else {
+          showToast('Error saving settings: ' + (res.error || ''), 'danger');
+        }
+      } catch (e) {
+        showToast('Failed to save broadcaster settings', 'danger');
+      }
+    }
+
+    async function reauthXbox() {
+      if (!confirm('This will wipe existing Xbox login tokens and restart the bot so you can link a new or refreshed Microsoft account. Proceed?')) return;
+      try {
+        const res = await apiRequest('/api/xbox/reauth', 'POST');
+        if (res.success) {
+          showToast('Login session reset. Generating new link code...', 'info');
+          setTimeout(checkXboxStatus, 3000);
+        } else {
+          showToast('Error resetting: ' + (res.error || ''), 'danger');
+        }
+      } catch (e) {
+        showToast('Failed to reset session', 'danger');
       }
     }
 
