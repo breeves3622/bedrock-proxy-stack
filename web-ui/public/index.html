@@ -3,172 +3,611 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minecraft Bedrock Proxy Manager</title>
+  <title>Bedrock Proxy Portal | Minecraft Server Manager</title>
+  
+  <!-- Minecraft Pixel Fonts + Clean Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --card-border: #334155;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #38bdf8;
-      --primary-hover: #0284c7;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --danger-hover: #dc2626;
-      --border-radius: 8px;
+      --mc-bedrock: #0d1217;
+      --mc-card: #151d26;
+      --mc-card-inner: #0b0f14;
+      --mc-border: #243242;
+      --mc-border-light: #384b60;
+      --mc-border-dark: #080c10;
+      --mc-diamond: #38bdf8;
+      --mc-diamond-glow: rgba(56, 189, 248, 0.35);
+      --mc-emerald: #10b981;
+      --mc-emerald-glow: rgba(16, 185, 129, 0.35);
+      --mc-redstone: #ef4444;
+      --mc-redstone-glow: rgba(239, 68, 68, 0.35);
+      --mc-gold: #f59e0b;
+      --mc-gold-glow: rgba(245, 158, 11, 0.35);
+      --mc-lapis: #3b82f6;
+      --mc-text: #f1f5f9;
+      --mc-text-muted: #8899ac;
+      --font-pixel: 'Silkscreen', cursive, monospace;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 24px; min-height: 100vh; }
-    .container { max-width: 900px; margin: 0 auto; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: radial-gradient(circle at 50% 0%, #1a232f 0%, #0d1217 65%, #07090c 100%);
+      color: var(--mc-text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      padding-bottom: 40px;
+      position: relative;
+    }
 
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
-    .title-group h1 { font-size: 1.6rem; display: flex; align-items: center; gap: 10px; }
-    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+    /* Top decorative Grass Block accent bar */
+    .top-grass-bar {
+      height: 6px;
+      width: 100%;
+      background: linear-gradient(90deg, #22c55e 0%, #16a34a 25%, #4ade80 50%, #16a34a 75%, #22c55e 100%);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--mc-border);
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .title-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: 2px solid var(--mc-diamond);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 0 14px var(--mc-diamond-glow);
+    }
+
+    .title-group h1 {
+      font-family: var(--font-pixel);
+      font-size: 1.4rem;
+      letter-spacing: 0.5px;
+      color: #fff;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .subtitle {
+      color: var(--mc-text-muted);
+      font-size: 0.88rem;
+      margin-top: 3px;
+    }
 
     /* Cards */
-    .card { background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--border-radius); padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
-    
+    .card {
+      background: var(--mc-card);
+      border: 2px solid var(--mc-border);
+      border-top-color: var(--mc-border-light);
+      border-left-color: var(--mc-border-light);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), 0 8px 24px rgba(0, 0, 0, 0.45);
+      position: relative;
+    }
+
+    .card-emerald-glow {
+      border-left: 4px solid var(--mc-emerald);
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), -4px 0 16px var(--mc-emerald-glow), 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+
     /* Status Bar */
-    .status-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-    .status-badge { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; padding: 6px 14px; border-radius: 20px; background: rgba(255,255,255,0.05); }
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); }
-    .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
-    .status-dot.stopped { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
-    .status-dot.restarting { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
 
-    /* Buttons */
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; border: none; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: background 0.2s, opacity 0.2s; text-decoration: none; }
-    .btn-primary { background: var(--primary); color: #000; }
-    .btn-primary:hover { background: var(--primary-hover); color: #fff; }
-    .btn-secondary { background: #334155; color: var(--text); }
-    .btn-secondary:hover { background: #475569; }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-danger:hover { background: var(--danger-hover); }
-    .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .card-title {
+      font-family: var(--font-pixel);
+      font-size: 1.05rem;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      text-shadow: 1px 1px 0 #000;
+    }
 
-    /* Server List */
-    .server-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .server-item { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 6px; margin-bottom: 10px; gap: 12px; }
-    .server-info { flex: 1; }
-    .server-name { font-weight: 600; font-size: 1.05rem; }
-    .server-address { color: var(--text-muted); font-size: 0.85rem; font-family: monospace; margin-top: 3px; }
-    .server-ping { margin-right: 12px; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
-    .server-actions { display: flex; gap: 6px; align-items: center; }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-pixel);
+      font-size: 0.76rem;
+      padding: 5px 12px;
+      border-radius: 4px;
+      background: #090e13;
+      border: 1px solid var(--mc-border);
+      box-shadow: inset 1px 1px 0 rgba(0,0,0,0.6);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      background: var(--mc-text-muted);
+    }
+    .status-dot.online {
+      background: var(--mc-emerald);
+      box-shadow: 0 0 8px var(--mc-emerald);
+    }
+    .status-dot.stopped {
+      background: var(--mc-redstone);
+      box-shadow: 0 0 8px var(--mc-redstone);
+    }
+    .status-dot.restarting {
+      background: var(--mc-gold);
+      box-shadow: 0 0 8px var(--mc-gold);
+      animation: pulse-glow 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    /* Minecraft Styled 3D Beveled Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: 2px solid;
+      font-family: var(--font-pixel);
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      text-decoration: none;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+      user-select: none;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+    }
+
+    .btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(0.8);
+    }
+
+    /* Stone / Secondary Button */
+    .btn-secondary {
+      background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+      color: #f1f5f9;
+      border-top-color: #475569;
+      border-left-color: #475569;
+      border-bottom-color: #0f172a;
+      border-right-color: #0f172a;
+    }
+    .btn-secondary:hover {
+      background: linear-gradient(180deg, #475569 0%, #334155 100%);
+      color: #fff;
+    }
+
+    /* Diamond / Primary Button */
+    .btn-primary {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      color: #fff;
+      border-top-color: #7dd3fc;
+      border-left-color: #7dd3fc;
+      border-bottom-color: #0369a1;
+      border-right-color: #0369a1;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #7dd3fc 0%, #0ea5e9 100%);
+      box-shadow: 0 0 14px var(--mc-diamond-glow);
+    }
+
+    /* Emerald Button */
+    .btn-emerald {
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border-top-color: #34d399;
+      border-left-color: #34d399;
+      border-bottom-color: #047857;
+      border-right-color: #047857;
+    }
+    .btn-emerald:hover {
+      background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+      box-shadow: 0 0 14px var(--mc-emerald-glow);
+    }
+
+    /* Redstone / Danger Button */
+    .btn-danger {
+      background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+      color: #fff;
+      border-top-color: #f87171;
+      border-left-color: #f87171;
+      border-bottom-color: #7f1d1d;
+      border-right-color: #7f1d1d;
+    }
+    .btn-danger:hover {
+      background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
+      box-shadow: 0 0 14px var(--mc-redstone-glow);
+    }
+
+    .btn-sm {
+      padding: 5px 11px;
+      font-size: 0.72rem;
+    }
+
+    /* Server List Section */
+    .server-list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .server-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--mc-card-inner);
+      border: 1px solid var(--mc-border);
+      border-radius: 6px;
+      margin-bottom: 10px;
+      gap: 12px;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .server-item:hover {
+      border-color: var(--mc-diamond);
+      background: #0f1620;
+    }
+
+    .server-info {
+      flex: 1;
+    }
+
+    .server-name {
+      font-family: var(--font-pixel);
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+
+    .server-address {
+      color: var(--mc-text-muted);
+      font-size: 0.84rem;
+      font-family: var(--font-mono);
+      margin-top: 4px;
+      display: inline-block;
+      background: rgba(0,0,0,0.3);
+      padding: 2px 7px;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Minecraft Signal Bars for Ping */
+    .ping-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      margin-right: 12px;
+      background: #090e13;
+      padding: 4px 9px;
+      border-radius: 4px;
+      border: 1px solid var(--mc-border);
+    }
+
+    .ping-bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 14px;
+    }
+    .ping-bar {
+      width: 3px;
+      background: #334155;
+      border-radius: 1px;
+    }
+    .ping-bar:nth-child(1) { height: 4px; }
+    .ping-bar:nth-child(2) { height: 7px; }
+    .ping-bar:nth-child(3) { height: 9px; }
+    .ping-bar:nth-child(4) { height: 11px; }
+    .ping-bar:nth-child(5) { height: 14px; }
+
+    .ping-bars.green .ping-bar { background: var(--mc-emerald); }
+    .ping-bars.yellow .ping-bar:nth-child(-n+3) { background: var(--mc-gold); }
+    .ping-bars.red .ping-bar:nth-child(-n+1) { background: var(--mc-redstone); }
+
+    .server-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
 
     /* Empty state */
-    .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--mc-text-muted);
+      font-family: var(--font-pixel);
+      font-size: 0.88rem;
+    }
+
+    /* Xbox Auth Banner */
+    .xbox-auth-box {
+      margin-top: 16px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 2px solid var(--mc-gold);
+      border-radius: 6px;
+      padding: 16px;
+      box-shadow: 0 0 16px var(--mc-gold-glow);
+    }
+
+    .code-display {
+      font-family: var(--font-pixel);
+      font-size: 1.25rem;
+      font-weight: bold;
+      background: #000;
+      padding: 4px 12px;
+      border-radius: 4px;
+      color: var(--mc-diamond);
+      letter-spacing: 2px;
+      border: 1px solid var(--mc-border);
+      text-shadow: 0 0 8px var(--mc-diamond-glow);
+      display: inline-block;
+      margin-left: 6px;
+    }
 
     /* Modal */
-    .modal-backdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); z-index: 100; align-items: center; justify-content: center; }
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(4, 7, 10, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
     .modal-backdrop.open { display: flex; }
-    .modal { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--border-radius); width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    .modal-title { font-size: 1.2rem; margin-bottom: 16px; }
+
+    .modal {
+      background: var(--mc-card);
+      border: 3px solid var(--mc-border);
+      border-top-color: var(--mc-border-light);
+      border-left-color: var(--mc-border-light);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 500px;
+      padding: 24px;
+      box-shadow: 0 14px 35px rgba(0,0,0,0.7), inset 1px 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .modal-title {
+      font-family: var(--font-pixel);
+      font-size: 1.15rem;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+      color: #fff;
+      text-shadow: 1px 1px 0 #000;
+    }
+
     .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); }
-    .form-control { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid var(--card-border); border-radius: 6px; color: var(--text); font-size: 0.95rem; }
-    .form-control:focus { outline: none; border-color: var(--primary); }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: var(--mc-text-muted);
+      font-weight: 500;
+    }
+    .form-control {
+      width: 100%;
+      padding: 11px 13px;
+      background: #080c10;
+      border: 2px solid var(--mc-border);
+      border-radius: 4px;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: var(--font-mono);
+      transition: border-color 0.15s ease;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--mc-diamond);
+      box-shadow: 0 0 10px var(--mc-diamond-glow);
+    }
 
-    /* Logs Viewer */
-    .logs-box { background: #090d16; border: 1px solid #1e293b; border-radius: 6px; padding: 14px; font-family: monospace; font-size: 0.82rem; height: 350px; overflow-y: auto; color: #a5f3fc; white-space: pre-wrap; word-break: break-all; }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 22px;
+    }
 
-    /* Toast Notification */
-    .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 6px; background: #334155; color: #fff; font-size: 0.9rem; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-    .toast.show { opacity: 1; }
-    .toast.success { background: #15803d; }
-    .toast.danger { background: #b91c1c; }
+    /* Logs Terminal Box */
+    .logs-box {
+      background: #05070a;
+      border: 2px solid #1a2430;
+      border-radius: 6px;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      height: 380px;
+      overflow-y: auto;
+      color: #67e8f9;
+      white-space: pre-wrap;
+      word-break: break-all;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+      line-height: 1.45;
+    }
+
+    /* Minecraft Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 14px 20px;
+      border-radius: 6px;
+      background: #111822;
+      border: 2px solid var(--mc-border);
+      color: #fff;
+      font-family: var(--font-pixel);
+      font-size: 0.82rem;
+      z-index: 200;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast.success {
+      border-color: var(--mc-emerald);
+      box-shadow: 0 0 16px var(--mc-emerald-glow);
+    }
+    .toast.danger {
+      border-color: var(--mc-redstone);
+      box-shadow: 0 0 16px var(--mc-redstone-glow);
+    }
   </style>
 </head>
 <body>
+  <!-- Decorative top grass block accent -->
+  <div class="top-grass-bar"></div>
+
   <div class="container">
+    <!-- Header -->
     <header>
       <div class="title-group">
-        <h1>🎮 Bedrock Proxy Manager</h1>
-        <div class="subtitle">Custom Server Menu & LAN Broadcast Service for Portainer</div>
+        <div class="title-icon">⛏️</div>
+        <div>
+          <h1>Bedrock Proxy Portal</h1>
+          <div class="subtitle">Custom Server Menu & Xbox Live Friend Gateway</div>
+        </div>
       </div>
       <div>
-        <button class="btn btn-secondary" onclick="openLogsModal()">📜 View Proxy Logs</button>
+        <button class="btn btn-secondary" onclick="openLogsModal()">📜 Proxy Logs</button>
       </div>
     </header>
 
     <!-- Proxy Container Status Card -->
     <div class="card">
       <div class="status-bar">
-        <div style="display:flex; align-items:center; gap: 12px;">
+        <div style="display:flex; align-items:center; gap: 14px;">
           <div class="status-badge">
             <span class="status-dot" id="proxyDot"></span>
-            <span id="proxyStatusText">Checking container...</span>
+            <span id="proxyStatusText">CHECKING PROXY...</span>
           </div>
-          <span id="proxyDetails" style="font-size: 0.85rem; color: var(--text-muted);"></span>
+          <span id="proxyDetails" style="font-size: 0.85rem; color: var(--mc-text-muted); font-family: var(--font-mono);"></span>
         </div>
         <div style="display:flex; gap: 8px;">
-          <button class="btn btn-secondary btn-sm" onclick="checkProxyStatus()">🔄 Refresh Status</button>
-          <button class="btn btn-danger btn-sm" id="btnRestart" onclick="restartProxy()">⚡ Restart Proxy Service</button>
+          <button class="btn btn-secondary btn-sm" onclick="checkProxyStatus()">🔄 Refresh</button>
+          <button class="btn btn-danger btn-sm" id="btnRestart" onclick="restartProxy()">⚡ Restart Proxy</button>
         </div>
       </div>
     </div>
 
     <!-- Xbox Live Friend Broadcaster Card (mcxboxbroadcast) -->
-    <div class="card" style="border-left: 4px solid #10b981;">
+    <div class="card card-emerald-glow">
       <div class="status-bar">
         <div>
           <div style="display:flex; align-items:center; gap: 10px;">
-            <h3 style="font-size: 1.1rem; display:flex; align-items:center; gap:6px;">🎮 Xbox Live Friend Broadcaster</h3>
-            <div class="status-badge" style="padding: 2px 10px; font-size: 0.8rem;">
+            <div class="card-title">🎮 Xbox Live Friend Broadcaster</div>
+            <div class="status-badge" style="padding: 3px 9px;">
               <span class="status-dot" id="xboxDot"></span>
-              <span id="xboxStatusText">Checking...</span>
+              <span id="xboxStatusText">CHECKING...</span>
             </div>
           </div>
-          <div class="subtitle" style="margin-top: 4px;">
-            Broadcasts your proxy as a joinable friend on Xbox Live so friends can join from their Friends tab (No LAN or DNS required!)
+          <div class="subtitle" style="margin-top: 5px;">
+            Broadcasts your proxy as a joinable Xbox Live friend so console & mobile players can join without LAN or DNS tricks!
           </div>
         </div>
         <div style="display:flex; gap: 8px; flex-wrap: wrap;">
-          <button class="btn btn-secondary btn-sm" onclick="openXboxSettingsModal()">⚙️ Broadcaster Setup</button>
+          <button class="btn btn-secondary btn-sm" onclick="openXboxSettingsModal()">⚙️ Setup</button>
           <button class="btn btn-secondary btn-sm" onclick="openXboxLogsModal()">📜 Logs</button>
-          <button class="btn btn-secondary btn-sm" onclick="reauthXbox()" title="Clear login and get new link code">🔄 Re-auth</button>
+          <button class="btn btn-secondary btn-sm" onclick="reauthXbox()" title="Clear login and generate new link code">🔄 Re-auth</button>
           <button class="btn btn-danger btn-sm" id="btnRestartXbox" onclick="restartXbox()">⚡ Restart Bot</button>
         </div>
       </div>
 
       <!-- Xbox Auth Code Alert (Shown when login is required) -->
-      <div id="xboxAuthBanner" style="display:none; margin-top: 16px; background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning); border-radius: 6px; padding: 14px 18px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <div id="xboxAuthBanner" class="xbox-auth-box" style="display:none;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
           <div>
-            <strong style="color: var(--warning); font-size: 1rem;">🔑 Microsoft Account Link Required!</strong>
-            <div style="font-size: 0.9rem; margin-top: 6px; color: var(--text);">
-              1. Open <a id="xboxAuthUrlLink" href="https://www.microsoft.com/link" target="_blank" style="color: var(--primary); text-decoration: underline; font-weight:600;">https://www.microsoft.com/link</a><br>
+            <strong style="color: var(--mc-gold); font-family: var(--font-pixel); font-size: 0.95rem; letter-spacing: 0.5px;">🔑 Microsoft Account Link Required!</strong>
+            <div style="font-size: 0.9rem; margin-top: 8px; color: var(--mc-text);">
+              1. Open <a id="xboxAuthUrlLink" href="https://www.microsoft.com/link" target="_blank" style="color: var(--mc-diamond); text-decoration: underline; font-weight:600;">https://www.microsoft.com/link</a><br>
               2. Enter code:
-              <span id="xboxAuthCodeDisplay" style="font-family: monospace; font-size: 1.2rem; font-weight: bold; background: #000; padding: 3px 10px; border-radius: 4px; margin-left: 6px; color: #38bdf8; letter-spacing: 1px;"></span>
+              <span id="xboxAuthCodeDisplay" class="code-display"></span>
             </div>
           </div>
           <div style="display:flex; gap:8px;">
             <button class="btn btn-secondary btn-sm" onclick="copyAuthCode()">📋 Copy Code</button>
-            <a id="xboxAuthBtn" href="https://www.microsoft.com/link" target="_blank" class="btn btn-primary btn-sm">🔗 Open Microsoft Login</a>
+            <a id="xboxAuthBtn" href="https://www.microsoft.com/link" target="_blank" class="btn btn-primary btn-sm">🔗 Open Login Page</a>
           </div>
         </div>
       </div>
 
       <!-- Join Links & Share Section (Shown when active) -->
-      <div id="xboxJoinSection" style="margin-top: 16px; padding: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 6px;">
+      <div id="xboxJoinSection" style="margin-top: 16px; padding: 14px; background: var(--mc-card-inner); border: 1px solid var(--mc-border); border-radius: 6px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div>
             <div style="display:flex; align-items:center; gap: 8px;">
-              <span style="font-size:0.85rem; color:var(--text-muted);">Bot Gamertag:</span>
-              <strong id="xboxGamertagDisplay" style="color:var(--primary); font-size: 1rem;">Not set</strong>
-              <span id="xboxAdvertisedIp" style="font-size:0.8rem; color:var(--text-muted); font-family:monospace; margin-left: 8px;"></span>
+              <span style="font-size:0.85rem; color:var(--mc-text-muted);">Bot Gamertag:</span>
+              <strong id="xboxGamertagDisplay" style="color:var(--mc-diamond); font-family:var(--font-pixel); font-size: 1.05rem;">Not set</strong>
+              <span id="xboxAdvertisedIp" style="font-size:0.8rem; color:var(--mc-text-muted); font-family:var(--font-mono); margin-left: 6px;"></span>
             </div>
-            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
-              Share this gamertag with friends. Once added, your proxy appears directly in their Minecraft <strong>Friends</strong> list!
+            <div style="font-size: 0.82rem; color: var(--mc-text-muted); margin-top: 4px;">
+              Share this gamertag with friends. Once added on Xbox, your proxy appears directly under their Minecraft <strong>Friends</strong> tab!
             </div>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <a id="xboxProfileBtn" href="#" target="_blank" class="btn btn-secondary btn-sm" style="display:none;">👤 Add on Xbox</a>
-            <button class="btn btn-primary btn-sm" onclick="copyInviteMessage()">📋 Copy Invite for Friends</button>
+            <button class="btn btn-emerald btn-sm" onclick="copyInviteMessage()">📋 Copy Invite for Friends</button>
             <a id="minecraftDirectBtn" href="#" class="btn btn-secondary btn-sm" style="display:none;">📱 One-Tap Bedrock Join</a>
           </div>
         </div>
@@ -179,7 +618,7 @@
     <div class="card">
       <div class="server-list-header">
         <div>
-          <h2>Available Servers</h2>
+          <div class="card-title">💎 Available Servers</div>
           <div class="subtitle">These servers are displayed inside the in-game Bedrock menu</div>
         </div>
         <div style="display:flex; gap: 8px;">
@@ -192,11 +631,11 @@
         <div class="empty-state">Loading servers...</div>
       </div>
 
-      <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--card-border); padding-top: 16px;">
-        <span style="font-size: 0.85rem; color: var(--text-muted);" id="unsavedNotice"></span>
+      <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--mc-border); padding-top: 16px;">
+        <span style="font-size: 0.85rem; color: var(--mc-gold); font-family: var(--font-pixel);" id="unsavedNotice"></span>
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-secondary" id="btnSaveOnly" onclick="saveServers(false)">💾 Save Changes</button>
-          <button class="btn btn-primary" id="btnSaveRestart" onclick="saveServers(true)">🚀 Save & Restart Proxy</button>
+          <button class="btn btn-emerald" id="btnSaveRestart" onclick="saveServers(true)">🚀 Save & Restart Proxy</button>
         </div>
       </div>
     </div>
@@ -207,20 +646,20 @@
     <div class="modal">
       <h3 class="modal-title" id="modalTitle">Add Minecraft Server</h3>
       <div class="form-group">
-        <label>Server Display Name</label>
-        <input type="text" class="form-control" id="modalServerName" placeholder="e.g. Local Survival SMP">
+        <label>Server Display Name (Supports § color codes)</label>
+        <input type="text" class="form-control" id="modalServerName" placeholder="e.g. §bSurvival §aSMP">
       </div>
       <div class="form-group">
-        <label>IP Address / Hostname</label>
-        <input type="text" class="form-control" id="modalServerAddress" placeholder="e.g. 192.168.1.100 or play.myserver.com">
+        <label>Target IP Address / Hostname</label>
+        <input type="text" class="form-control" id="modalServerAddress" placeholder="e.g. 10.80.1.55 or mc.mydomain.com">
       </div>
       <div class="form-group">
-        <label>Port (Default 19132)</label>
-        <input type="number" class="form-control" id="modalServerPort" value="19132">
+        <label>Target Bedrock Port (Default 19133+)</label>
+        <input type="number" class="form-control" id="modalServerPort" value="19133">
       </div>
-      <div style="margin-bottom: 12px;">
+      <div style="margin-bottom: 14px;">
         <button type="button" class="btn btn-secondary btn-sm" onclick="testModalServer()">📡 Test Connection</button>
-        <span id="modalTestResult" style="font-size: 0.85rem; margin-left: 10px;"></span>
+        <span id="modalTestResult" style="font-size: 0.85rem; margin-left: 10px; font-family:var(--font-mono);"></span>
       </div>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
@@ -229,11 +668,36 @@
     </div>
   </div>
 
+  <!-- Xbox Broadcaster Setup & Settings Modal -->
+  <div class="modal-backdrop" id="xboxSettingsModal">
+    <div class="modal">
+      <h3 class="modal-title">⚙️ Xbox Broadcaster Setup</h3>
+      <div class="form-group">
+        <label>Advertised IP or Domain (Where friends connect)</label>
+        <input type="text" class="form-control" id="xboxSettingIp" placeholder="e.g. 10.80.1.55 (LAN) or play.mydomain.com (Internet)">
+        <span style="font-size:0.78rem; color:var(--mc-text-muted); margin-top:3px; display:block;">Use your local IP for home LAN, or your Public IP / DDNS for internet friends.</span>
+      </div>
+      <div class="form-group">
+        <label>Advertised Bedrock Port (Default 19132)</label>
+        <input type="number" class="form-control" id="xboxSettingPort" value="19132">
+      </div>
+      <div class="form-group">
+        <label>Bot Xbox Gamertag (Account used to broadcast)</label>
+        <input type="text" class="form-control" id="xboxSettingGamertag" placeholder="e.g. MorbidServer">
+        <span style="font-size:0.78rem; color:var(--mc-text-muted); margin-top:3px; display:block;">Used to generate direct Xbox Add-Friend links for players.</span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeXboxSettingsModal()">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveXboxSettings(true)">🚀 Save & Restart Bot</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Logs Modal (Proxy) -->
   <div class="modal-backdrop" id="logsModal">
-    <div class="modal" style="max-width: 750px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <h3 class="modal-title" style="margin: 0;">📜 Proxy Service Logs</h3>
+    <div class="modal" style="max-width: 780px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 class="modal-title" style="margin: 0;">📜 Bedrock Proxy Logs</h3>
         <button class="btn btn-secondary btn-sm" onclick="fetchLogs()">🔄 Refresh</button>
       </div>
       <div class="logs-box" id="logsContent">Loading logs...</div>
@@ -245,39 +709,14 @@
 
   <!-- Logs Modal (Xbox Broadcaster) -->
   <div class="modal-backdrop" id="xboxLogsModal">
-    <div class="modal" style="max-width: 750px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <h3 class="modal-title" style="margin: 0;">📜 Xbox Live Broadcaster Logs</h3>
+    <div class="modal" style="max-width: 780px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 class="modal-title" style="margin: 0;">📜 Xbox Broadcaster Logs</h3>
         <button class="btn btn-secondary btn-sm" onclick="fetchXboxLogs()">🔄 Refresh</button>
       </div>
       <div class="logs-box" id="xboxLogsContent">Loading logs...</div>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeXboxLogsModal()">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Xbox Broadcaster Setup & Settings Modal -->
-  <div class="modal-backdrop" id="xboxSettingsModal">
-    <div class="modal">
-      <h3 class="modal-title">⚙️ Xbox Broadcaster Setup</h3>
-      <div class="form-group">
-        <label>Advertised IP or Domain (Where friends connect)</label>
-        <input type="text" class="form-control" id="xboxSettingIp" placeholder="e.g. 192.168.1.100 (LAN) or play.mydomain.com (Internet)">
-        <span style="font-size:0.78rem; color:var(--text-muted); margin-top:3px; display:block;">Use your local IP for LAN play, or your Public IP / DDNS for internet friends.</span>
-      </div>
-      <div class="form-group">
-        <label>Advertised Bedrock Port (Default 19132)</label>
-        <input type="number" class="form-control" id="xboxSettingPort" value="19132">
-      </div>
-      <div class="form-group">
-        <label>Bot Xbox Gamertag (Account used to broadcast)</label>
-        <input type="text" class="form-control" id="xboxSettingGamertag" placeholder="e.g. MyServerBot">
-        <span style="font-size:0.78rem; color:var(--text-muted); margin-top:3px; display:block;">Used to generate direct Xbox Add-Friend links for players.</span>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closeXboxSettingsModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="saveXboxSettings(true)">🚀 Save & Restart Bot</button>
       </div>
     </div>
   </div>
@@ -290,12 +729,14 @@
     let editingIndex = -1;
     let hasUnsavedChanges = false;
     let authToken = '';
+    let currentXboxDetails = null;
 
     function showToast(message, type = 'info') {
       const toast = document.getElementById('toast');
-      toast.textContent = message;
+      const icon = type === 'success' ? '🏆' : (type === 'danger' ? '⚠️' : 'ℹ️');
+      toast.innerHTML = `<span>${icon}</span> <span>${escapeHtml(message)}</span>`;
       toast.className = `toast show ${type}`;
-      setTimeout(() => { toast.className = 'toast'; }, 3000);
+      setTimeout(() => { toast.className = 'toast'; }, 3200);
     }
 
     async function apiRequest(endpoint, method = 'GET', data = null) {
@@ -309,6 +750,47 @@
       return res.json();
     }
 
+    // Minecraft Bedrock Color Code (§) Formatter
+    function formatBedrockColors(text) {
+      if (!text) return '';
+      const colorMap = {
+        '0': '#000000', '1': '#0000AA', '2': '#00AA00', '3': '#00AAAA',
+        '4': '#AA0000', '5': '#AA00AA', '6': '#FFAA00', '7': '#AAAAAA',
+        '8': '#555555', '9': '#5555FF', 'a': '#55FF55', 'b': '#55FFFF',
+        'c': '#FF5555', 'd': '#FF55FF', 'e': '#FFFF55', 'f': '#FFFFFF',
+        'g': '#DDD605'
+      };
+
+      const tokens = escapeHtml(text).split(/§([0-9a-fglrok])/i);
+      let formatted = tokens[0];
+      let currentColor = null;
+      let isBold = false;
+
+      for (let i = 1; i < tokens.length; i += 2) {
+        const code = tokens[i].toLowerCase();
+        const str = tokens[i + 1] || '';
+        if (code === 'r') {
+          currentColor = null;
+          isBold = false;
+        } else if (code === 'l') {
+          isBold = true;
+        } else if (colorMap[code]) {
+          currentColor = colorMap[code];
+        }
+
+        let style = '';
+        if (currentColor) style += `color:${currentColor};`;
+        if (isBold) style += 'font-weight:bold;';
+
+        if (style) {
+          formatted += `<span style="${style}">${str}</span>`;
+        } else {
+          formatted += str;
+        }
+      }
+      return formatted;
+    }
+
     async function checkProxyStatus() {
       const dot = document.getElementById('proxyDot');
       const text = document.getElementById('proxyStatusText');
@@ -318,21 +800,166 @@
         const data = await apiRequest('/api/proxy/status');
         if (data.running) {
           dot.className = 'status-dot online';
-          text.textContent = `Proxy Running (${data.status})`;
-          details.textContent = `Container: ${data.container}`;
+          text.textContent = `PROXY ONLINE (${data.status.toUpperCase()})`;
+          details.textContent = `${data.container} (port 19132)`;
         } else if (data.status === 'restarting') {
           dot.className = 'status-dot restarting';
-          text.textContent = 'Proxy Restarting...';
+          text.textContent = 'PROXY RESTARTING...';
           details.textContent = '';
         } else {
           dot.className = 'status-dot stopped';
-          text.textContent = `Proxy Inactive (${data.status})`;
+          text.textContent = `PROXY OFFLINE (${data.status.toUpperCase()})`;
           details.textContent = data.error || 'Container is not running';
         }
       } catch (err) {
         dot.className = 'status-dot stopped';
-        text.textContent = 'Unable to query Docker status';
-        details.textContent = 'Check docker socket mount';
+        text.textContent = 'DOCKER UNREACHABLE';
+        details.textContent = 'Check docker socket';
+      }
+    }
+
+    async function checkXboxStatus() {
+      const dot = document.getElementById('xboxDot');
+      const text = document.getElementById('xboxStatusText');
+      const banner = document.getElementById('xboxAuthBanner');
+      const gamertagEl = document.getElementById('xboxGamertagDisplay');
+      const advertisedIpEl = document.getElementById('xboxAdvertisedIp');
+      const profileBtn = document.getElementById('xboxProfileBtn');
+      const minecraftBtn = document.getElementById('minecraftDirectBtn');
+
+      try {
+        const data = await apiRequest('/api/xbox/details');
+        currentXboxDetails = data;
+
+        if (data.running) {
+          if (data.authRequired && data.authCode) {
+            dot.className = 'status-dot restarting';
+            text.textContent = 'ACTION REQUIRED';
+            banner.style.display = 'block';
+            document.getElementById('xboxAuthCodeDisplay').textContent = data.authCode;
+            document.getElementById('xboxAuthUrlLink').href = data.authUrl || 'https://www.microsoft.com/link';
+            document.getElementById('xboxAuthBtn').href = data.authUrl || 'https://www.microsoft.com/link';
+          } else {
+            dot.className = 'status-dot online';
+            text.textContent = `BROADCASTING LIVE (${data.status.toUpperCase()})`;
+            banner.style.display = 'none';
+          }
+
+          // Gamertag & Join Links
+          if (data.gamertag) {
+            gamertagEl.textContent = data.gamertag;
+            profileBtn.href = data.joinLinks?.xboxProfileUrl || '#';
+            profileBtn.style.display = 'inline-flex';
+          } else {
+            gamertagEl.textContent = '(Click Setup to set Gamertag)';
+            profileBtn.style.display = 'none';
+          }
+
+          if (data.ip) {
+            advertisedIpEl.textContent = `(${data.ip}:${data.port || 19132})`;
+            minecraftBtn.href = data.joinLinks?.directJoinUri || '#';
+            minecraftBtn.style.display = 'inline-flex';
+          } else {
+            advertisedIpEl.textContent = '';
+            minecraftBtn.style.display = 'none';
+          }
+
+        } else if (data.status === 'restarting') {
+          dot.className = 'status-dot restarting';
+          text.textContent = 'RESTARTING...';
+        } else {
+          dot.className = 'status-dot stopped';
+          text.textContent = `INACTIVE (${data.status.toUpperCase()})`;
+          banner.style.display = 'none';
+        }
+      } catch (e) {
+        dot.className = 'status-dot stopped';
+        text.textContent = 'NOT AVAILABLE';
+        banner.style.display = 'none';
+      }
+    }
+
+    function copyAuthCode() {
+      const code = document.getElementById('xboxAuthCodeDisplay').textContent.trim();
+      if (!code) return;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast(`Copied code "${code}"!`, 'success');
+      });
+    }
+
+    function copyInviteMessage() {
+      const message = currentXboxDetails?.joinLinks?.shareMessage || 'Join our Minecraft server via Bedrock Proxy!';
+      navigator.clipboard.writeText(message).then(() => {
+        showToast('Copied friend invite instructions!', 'success');
+      });
+    }
+
+    function openXboxSettingsModal() {
+      if (currentXboxDetails) {
+        document.getElementById('xboxSettingIp').value = currentXboxDetails.ip || '';
+        document.getElementById('xboxSettingPort').value = currentXboxDetails.port || 19132;
+        document.getElementById('xboxSettingGamertag').value = currentXboxDetails.gamertag || '';
+      }
+      document.getElementById('xboxSettingsModal').classList.add('open');
+    }
+
+    function closeXboxSettingsModal() {
+      document.getElementById('xboxSettingsModal').classList.remove('open');
+    }
+
+    async function saveXboxSettings(restart = true) {
+      const ip = document.getElementById('xboxSettingIp').value.trim();
+      const port = parseInt(document.getElementById('xboxSettingPort').value.trim(), 10) || 19132;
+      const gamertag = document.getElementById('xboxSettingGamertag').value.trim();
+
+      try {
+        const res = await apiRequest('/api/xbox/save-settings', 'POST', { ip, port, gamertag, restart });
+        if (res.success) {
+          showToast('Broadcaster settings saved!', 'success');
+          closeXboxSettingsModal();
+          setTimeout(checkXboxStatus, 2500);
+        } else {
+          showToast('Error saving: ' + (res.error || ''), 'danger');
+        }
+      } catch (e) {
+        showToast('Failed to save broadcaster settings', 'danger');
+      }
+    }
+
+    async function reauthXbox() {
+      if (!confirm('This will clear stored Xbox credentials and generate a fresh Microsoft device link code. Continue?')) return;
+      try {
+        const res = await apiRequest('/api/xbox/reauth', 'POST');
+        if (res.success) {
+          showToast('Session reset. Generating new code...', 'info');
+          setTimeout(checkXboxStatus, 3000);
+        } else {
+          showToast('Error resetting: ' + (res.error || ''), 'danger');
+        }
+      } catch (e) {
+        showToast('Failed to reset session', 'danger');
+      }
+    }
+
+    async function restartXbox() {
+      if (!confirm('Restart the Xbox Live Friend Broadcaster?')) return;
+      const btn = document.getElementById('btnRestartXbox');
+      btn.disabled = true;
+      btn.textContent = '⚡ Restarting...';
+
+      try {
+        const res = await apiRequest('/api/xbox/restart', 'POST');
+        if (res.success) {
+          showToast('Xbox Broadcaster restarted!', 'success');
+          setTimeout(checkXboxStatus, 2500);
+        } else {
+          showToast('Restart failed: ' + (res.error || ''), 'danger');
+        }
+      } catch (e) {
+        showToast('Error requesting restart', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⚡ Restart Bot';
       }
     }
 
@@ -348,13 +975,13 @@
           showToast('Proxy restarted successfully!', 'success');
           setTimeout(checkProxyStatus, 2000);
         } else {
-          showToast('Restart failed: ' + (res.error || 'Unknown error'), 'danger');
+          showToast('Restart failed: ' + (res.error || ''), 'danger');
         }
       } catch (e) {
         showToast('Error requesting restart', 'danger');
       } finally {
         btn.disabled = false;
-        btn.textContent = '⚡ Restart Proxy Service';
+        btn.textContent = '⚡ Restart Proxy';
       }
     }
 
@@ -366,7 +993,7 @@
         pingAllServers();
       } catch (e) {
         document.getElementById('serverListContainer').innerHTML =
-          `<div class="empty-state" style="color:var(--danger)">Failed to load servers list.</div>`;
+          `<div class="empty-state" style="color:var(--mc-redstone)">Failed to load servers list.</div>`;
       }
     }
 
@@ -376,27 +1003,34 @@
         container.innerHTML = `
           <div class="empty-state">
             <p>No servers configured yet.</p>
-            <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openAddModal()">➕ Add Your First Server</button>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="openAddModal()">➕ Add Your First Server</button>
           </div>`;
         return;
       }
 
       container.innerHTML = servers.map((s, index) => `
         <div class="server-item" id="server-row-${index}">
-          <div style="display:flex; align-items:center; gap: 10px;">
-            <div style="display:flex; flex-direction:column; gap:2px;">
+          <div style="display:flex; align-items:center; gap: 12px;">
+            <div style="display:flex; flex-direction:column; gap:3px;">
               <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:10px;" onclick="moveServer(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
               <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:10px;" onclick="moveServer(${index}, 1)" ${index === servers.length - 1 ? 'disabled' : ''}>▼</button>
             </div>
             <div class="server-info">
-              <div class="server-name">${escapeHtml(s.name)}</div>
+              <div class="server-name">${formatBedrockColors(s.name)}</div>
               <div class="server-address">${escapeHtml(s.address)}:${s.port}</div>
             </div>
           </div>
           <div style="display: flex; align-items: center;">
-            <span class="server-ping" id="ping-${index}">
-              <span class="status-dot"></span> Checking...
-            </span>
+            <div class="ping-indicator" id="ping-${index}">
+              <div class="ping-bars">
+                <span class="ping-bar"></span>
+                <span class="ping-bar"></span>
+                <span class="ping-bar"></span>
+                <span class="ping-bar"></span>
+                <span class="ping-bar"></span>
+              </div>
+              <span>Checking...</span>
+            </div>
             <div class="server-actions">
               <button class="btn btn-secondary btn-sm" onclick="openEditModal(${index})">✏️ Edit</button>
               <button class="btn btn-danger btn-sm" onclick="deleteServer(${index})">🗑️</button>
@@ -418,7 +1052,7 @@
 
     function markUnsaved() {
       hasUnsavedChanges = true;
-      document.getElementById('unsavedNotice').textContent = '⚠️ You have unsaved changes.';
+      document.getElementById('unsavedNotice').textContent = '⚠️ Unsaved Changes Pending';
     }
 
     function clearUnsaved() {
@@ -430,21 +1064,33 @@
       servers.forEach(async (s, index) => {
         const pingEl = document.getElementById(`ping-${index}`);
         if (!pingEl) return;
-        pingEl.innerHTML = `<span class="status-dot"></span> Pinging...`;
 
         try {
           const res = await apiRequest(`/api/ping?host=${encodeURIComponent(s.address)}&port=${s.port}`);
           if (res.online) {
+            let barClass = 'green';
+            if (res.latency > 150) barClass = 'red';
+            else if (res.latency > 70) barClass = 'yellow';
+
             pingEl.innerHTML = `
-              <span class="status-dot online"></span>
-              <span style="color:var(--success)">${res.latency}ms</span>
-              ${res.players !== undefined ? `<span style="color:var(--text-muted); font-size:0.78rem;">(${res.players}/${res.maxPlayers})</span>` : ''}
+              <div class="ping-bars ${barClass}">
+                <span class="ping-bar"></span>
+                <span class="ping-bar"></span>
+                <span class="ping-bar"></span>
+                <span class="ping-bar"></span>
+                <span class="ping-bar"></span>
+              </div>
+              <span style="color:var(--mc-${barClass === 'green' ? 'emerald' : (barClass === 'yellow' ? 'gold' : 'redstone')}); font-weight:600;">${res.latency}ms</span>
+              ${res.players !== undefined ? `<span style="color:var(--mc-text-muted); font-size:0.78rem;">(${res.players}/${res.maxPlayers})</span>` : ''}
             `;
           } else {
-            pingEl.innerHTML = `<span class="status-dot stopped"></span> <span style="color:var(--danger)">Offline</span>`;
+            pingEl.innerHTML = `
+              <div class="ping-bars red"><span class="ping-bar"></span></div>
+              <span style="color:var(--mc-redstone)">Offline</span>
+            `;
           }
         } catch (e) {
-          pingEl.innerHTML = `<span class="status-dot stopped"></span> Unreachable`;
+          pingEl.innerHTML = `<span style="color:var(--mc-redstone)">Unreachable</span>`;
         }
       });
     }
@@ -454,7 +1100,7 @@
       document.getElementById('modalTitle').textContent = 'Add Minecraft Server';
       document.getElementById('modalServerName').value = '';
       document.getElementById('modalServerAddress').value = '';
-      document.getElementById('modalServerPort').value = '19132';
+      document.getElementById('modalServerPort').value = '19133';
       document.getElementById('modalTestResult').textContent = '';
       document.getElementById('serverModal').classList.add('open');
     }
@@ -481,25 +1127,25 @@
 
       if (!host || !port) {
         resEl.textContent = 'Enter address & port first.';
-        resEl.style.color = 'var(--warning)';
+        resEl.style.color = 'var(--mc-gold)';
         return;
       }
 
       resEl.textContent = 'Pinging...';
-      resEl.style.color = 'var(--text-muted)';
+      resEl.style.color = 'var(--mc-text-muted)';
 
       try {
         const res = await apiRequest(`/api/ping?host=${encodeURIComponent(host)}&port=${port}`);
         if (res.online) {
           resEl.textContent = `Online (${res.latency}ms) - ${res.serverName || 'Bedrock'}`;
-          resEl.style.color = 'var(--success)';
+          resEl.style.color = 'var(--mc-emerald)';
         } else {
-          resEl.textContent = 'Offline or no response';
-          resEl.style.color = 'var(--danger)';
+          resEl.textContent = 'Offline or unreachable';
+          resEl.style.color = 'var(--mc-redstone)';
         }
       } catch (e) {
         resEl.textContent = 'Ping failed';
-        resEl.style.color = 'var(--danger)';
+        resEl.style.color = 'var(--mc-redstone)';
       }
     }
 
@@ -553,7 +1199,7 @@
               showToast('Proxy restarted with updated servers!', 'success');
               setTimeout(checkProxyStatus, 2000);
             } else {
-              showToast('Saved, but failed to restart proxy: ' + (restartRes.error || ''), 'warning');
+              showToast('Saved, but failed to restart proxy: ' + (restartRes.error || ''), 'danger');
             }
           }
         } else {
@@ -589,153 +1235,6 @@
         }
       } catch (e) {
         box.textContent = 'Error connecting to Docker API.';
-      }
-    }
-
-    let currentXboxDetails = null;
-
-    async function checkXboxStatus() {
-      const dot = document.getElementById('xboxDot');
-      const text = document.getElementById('xboxStatusText');
-      const banner = document.getElementById('xboxAuthBanner');
-      const gamertagEl = document.getElementById('xboxGamertagDisplay');
-      const advertisedIpEl = document.getElementById('xboxAdvertisedIp');
-      const profileBtn = document.getElementById('xboxProfileBtn');
-      const minecraftBtn = document.getElementById('minecraftDirectBtn');
-
-      try {
-        const data = await apiRequest('/api/xbox/details');
-        currentXboxDetails = data;
-
-        if (data.running) {
-          if (data.authRequired && data.authCode) {
-            dot.className = 'status-dot restarting';
-            text.textContent = 'Action Required: Sign In';
-            banner.style.display = 'block';
-            document.getElementById('xboxAuthCodeDisplay').textContent = data.authCode;
-            document.getElementById('xboxAuthUrlLink').href = data.authUrl || 'https://www.microsoft.com/link';
-            document.getElementById('xboxAuthBtn').href = data.authUrl || 'https://www.microsoft.com/link';
-          } else {
-            dot.className = 'status-dot online';
-            text.textContent = `Broadcasting Live (${data.status})`;
-            banner.style.display = 'none';
-          }
-
-          // Gamertag & Join Links
-          if (data.gamertag) {
-            gamertagEl.textContent = data.gamertag;
-            profileBtn.href = data.joinLinks?.xboxProfileUrl || '#';
-            profileBtn.style.display = 'inline-flex';
-          } else {
-            gamertagEl.textContent = '(Not configured yet - click Broadcaster Setup)';
-            profileBtn.style.display = 'none';
-          }
-
-          if (data.ip) {
-            advertisedIpEl.textContent = `(${data.ip}:${data.port || 19132})`;
-            minecraftBtn.href = data.joinLinks?.directJoinUri || '#';
-            minecraftBtn.style.display = 'inline-flex';
-          } else {
-            advertisedIpEl.textContent = '';
-            minecraftBtn.style.display = 'none';
-          }
-
-        } else if (data.status === 'restarting') {
-          dot.className = 'status-dot restarting';
-          text.textContent = 'Restarting...';
-        } else {
-          dot.className = 'status-dot stopped';
-          text.textContent = `Inactive (${data.status})`;
-          banner.style.display = 'none';
-        }
-      } catch (e) {
-        dot.className = 'status-dot stopped';
-        text.textContent = 'Not Available';
-        banner.style.display = 'none';
-      }
-    }
-
-    function copyAuthCode() {
-      const code = document.getElementById('xboxAuthCodeDisplay').textContent.trim();
-      if (!code) return;
-      navigator.clipboard.writeText(code).then(() => {
-        showToast(`Copied code "${code}" to clipboard!`, 'success');
-      });
-    }
-
-    function copyInviteMessage() {
-      const message = currentXboxDetails?.joinLinks?.shareMessage || 'Join our Minecraft server via Bedrock Proxy!';
-      navigator.clipboard.writeText(message).then(() => {
-        showToast('Copied friend invite instructions to clipboard!', 'success');
-      });
-    }
-
-    function openXboxSettingsModal() {
-      if (currentXboxDetails) {
-        document.getElementById('xboxSettingIp').value = currentXboxDetails.ip || '';
-        document.getElementById('xboxSettingPort').value = currentXboxDetails.port || 19132;
-        document.getElementById('xboxSettingGamertag').value = currentXboxDetails.gamertag || '';
-      }
-      document.getElementById('xboxSettingsModal').classList.add('open');
-    }
-
-    function closeXboxSettingsModal() {
-      document.getElementById('xboxSettingsModal').classList.remove('open');
-    }
-
-    async function saveXboxSettings(restart = true) {
-      const ip = document.getElementById('xboxSettingIp').value.trim();
-      const port = parseInt(document.getElementById('xboxSettingPort').value.trim(), 10) || 19132;
-      const gamertag = document.getElementById('xboxSettingGamertag').value.trim();
-
-      try {
-        const res = await apiRequest('/api/xbox/save-settings', 'POST', { ip, port, gamertag, restart });
-        if (res.success) {
-          showToast('Broadcaster settings saved!', 'success');
-          closeXboxSettingsModal();
-          setTimeout(checkXboxStatus, 2500);
-        } else {
-          showToast('Error saving settings: ' + (res.error || ''), 'danger');
-        }
-      } catch (e) {
-        showToast('Failed to save broadcaster settings', 'danger');
-      }
-    }
-
-    async function reauthXbox() {
-      if (!confirm('This will wipe existing Xbox login tokens and restart the bot so you can link a new or refreshed Microsoft account. Proceed?')) return;
-      try {
-        const res = await apiRequest('/api/xbox/reauth', 'POST');
-        if (res.success) {
-          showToast('Login session reset. Generating new link code...', 'info');
-          setTimeout(checkXboxStatus, 3000);
-        } else {
-          showToast('Error resetting: ' + (res.error || ''), 'danger');
-        }
-      } catch (e) {
-        showToast('Failed to reset session', 'danger');
-      }
-    }
-
-    async function restartXbox() {
-      if (!confirm('Restart the Xbox Live Friend Broadcaster?')) return;
-      const btn = document.getElementById('btnRestartXbox');
-      btn.disabled = true;
-      btn.textContent = '⚡ Restarting...';
-
-      try {
-        const res = await apiRequest('/api/xbox/restart', 'POST');
-        if (res.success) {
-          showToast('Xbox Broadcaster restarted!', 'success');
-          setTimeout(checkXboxStatus, 2500);
-        } else {
-          showToast('Restart failed: ' + (res.error || ''), 'danger');
-        }
-      } catch (e) {
-        showToast('Error requesting restart', 'danger');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '⚡ Restart Bot';
       }
     }
 
