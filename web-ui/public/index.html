@@ -102,176 +102,7 @@
       margin: 0 auto;
       padding: 24px 16px;
       position: relative;
-      z-index: 10;
-    }
-
-    /* =========================================================
-       ENDERMAN CHUNK BUILD OVERLAY & GRID
-       ========================================================= */
-    .build-overlay {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 100;
-      overflow: hidden;
-      display: none;
-    }
-    .build-overlay.active {
-      display: block;
-      pointer-events: auto;
-    }
-
-    /* Chunk Grid Wireframe */
-    .chunk-grid-wireframe {
-      position: absolute;
-      inset: 0;
-      background-image: 
-        linear-gradient(to right, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
-      background-size: 32px 32px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .chunk-grid-wireframe.visible {
-      opacity: 1;
-    }
-
-    /* Target Box Outlines */
-    .grid-target-box {
-      position: absolute;
-      border: 2px dashed rgba(192, 132, 252, 0.45);
-      border-radius: 10px;
-      background: rgba(168, 85, 247, 0.04);
-      box-shadow: inset 0 0 16px rgba(168, 85, 247, 0.12);
-      opacity: 0;
-      transform: scale(0.98);
-      transition: all 0.25s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--mc-purple);
-      letter-spacing: 1px;
-    }
-    .grid-target-box.active {
-      opacity: 1;
-      transform: scale(1);
-    }
-    .grid-target-box.placed {
-      border-style: solid;
-      border-color: var(--mc-emerald);
-      background: rgba(16, 185, 129, 0.06);
-      color: var(--mc-emerald);
-      opacity: 0;
-      transition: opacity 0.45s ease;
-    }
-
-    /* Enderman Actor Sprite */
-    .enderman-actor {
-      position: absolute;
-      width: 70px;
-      height: 130px;
-      pointer-events: none;
-      z-index: 120;
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(1);
-      transition: opacity 0.12s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-      filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.85));
-    }
-    .enderman-actor.visible {
-      opacity: 1;
-    }
-
-    /* Purple Teleport Particles */
-    .teleport-burst {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      pointer-events: none;
-      z-index: 110;
-      transform: translate(-50%, -50%);
-    }
-    .tp-particle {
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      background: #e879f9;
-      border-radius: 50%;
-      box-shadow: 0 0 10px #c084fc;
-      animation: tpParticleBurst 0.6s forwards ease-out;
-    }
-    @keyframes tpParticleBurst {
-      0% { transform: translate(0, 0) scale(1.4); opacity: 1; }
-      100% { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; }
-    }
-
-    /* Block Placement Dust Puff */
-    .block-dust-puff {
-      position: absolute;
-      pointer-events: none;
-      z-index: 115;
-      width: 120px;
-      height: 40px;
-      transform: translate(-50%, -50%);
-    }
-    .dust-cube {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: #cbd5e1;
-      border: 1px solid #94a3b8;
-      animation: dustScatter 0.5s forwards ease-out;
-    }
-    @keyframes dustScatter {
-      0% { transform: translate(0, 0) scale(1); opacity: 0.9; }
-      100% { transform: translate(var(--pdx), var(--pdy)) scale(0.3); opacity: 0; }
-    }
-
-    /* Skip Build Button */
-    .build-skip-btn {
-      position: fixed;
-      top: 18px;
-      right: 20px;
-      z-index: 200;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid var(--mc-border);
-      color: var(--mc-text-muted);
-      font-size: 0.78rem;
-      font-family: var(--font-mono);
-      padding: 5px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      display: none;
-      transition: all 0.15s ease;
-    }
-    .build-skip-btn:hover {
-      color: #fff;
-      border-color: var(--mc-diamond);
-    }
-    .build-skip-btn.visible {
-      display: block;
-    }
-
-    /* Page Chunks Transition Classes */
-    .portal-chunk {
-      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
-      will-change: transform, opacity;
-    }
-    .portal-chunk.chunk-hidden {
-      opacity: 0;
-      transform: translateY(-30px) scale(0.92);
-      pointer-events: none;
-    }
-    .portal-chunk.chunk-placed {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      animation: chunkSnap 0.4s ease-out;
-    }
-    @keyframes chunkSnap {
-      0% { transform: scale(1.04) translateY(-8px); filter: brightness(1.3); }
-      50% { transform: scale(0.98) translateY(3px); }
-      100% { transform: scale(1) translateY(0); filter: brightness(1); }
+      z-index: 1;
     }
 
     /* Flanking Decorative Minecraft Pillars (Desktop Widescreen >= 1340px) */
@@ -296,6 +127,7 @@
       right: max(16px, calc(50% - 480px - 220px));
     }
 
+    /* Hidden on screens < 1340px to prevent crowding */
     @media (max-width: 1339px) {
       .mc-flank {
         display: none !important;
@@ -377,8 +209,8 @@
       align-items: center;
     }
     .ore-block {
-      width: 60px;
-      height: 60px;
+      width: 64px;
+      height: 64px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.6);
       border-radius: 4px;
     }
@@ -1102,7 +934,10 @@
       box-shadow: 0 0 18px var(--mc-redstone-glow);
     }
 
-    /* Mobile Hotbar Dock (< 768px) */
+    /* =========================================================
+       DYNAMIC MOBILE OPTIMIZATIONS (< 768px)
+       Clean, native, uncluttered touch layout with Minecraft Hotbar
+       ========================================================= */
     .mc-mobile-hotbar {
       display: none;
       position: fixed;
@@ -1149,7 +984,7 @@
 
     @media (max-width: 768px) {
       body {
-        padding-bottom: 84px;
+        padding-bottom: 84px; /* Space for the floating bottom hotbar */
       }
       .container {
         padding: 14px 12px;
@@ -1176,7 +1011,7 @@
         gap: 12px;
       }
       .btn {
-        min-height: 42px;
+        min-height: 42px; /* Touch-friendly tap target */
       }
       .mc-mobile-hotbar {
         display: flex;
@@ -1189,7 +1024,7 @@
       }
     }
 
-    /* Extra Small Screen (< 640px) */
+    /* Extra Small Screen Adaptations (< 640px) */
     @media (max-width: 640px) {
       .server-item {
         flex-direction: column;
@@ -1245,72 +1080,37 @@
   <div class="mc-orb mc-orb-3"></div>
 
   <!-- =========================================================
-       ANIMATED ENDERMAN CHUNK BUILD OVERLAY
-       ========================================================= -->
-  <div class="build-overlay" id="buildOverlay">
-    <div class="chunk-grid-wireframe" id="chunkGrid"></div>
-
-    <!-- Chunk Placement Outlines -->
-    <div class="grid-target-box" id="targetHeader"><span>[CHUNK: HEADER]</span></div>
-    <div class="grid-target-box" id="targetXbox"><span>[CHUNK: XBOX_BROADCASTER]</span></div>
-    <div class="grid-target-box" id="targetServers"><span>[CHUNK: SERVER_LIST]</span></div>
-
-    <!-- Enderman Actor Sprite -->
-    <div class="enderman-actor" id="endermanActor">
-      <svg viewBox="0 0 60 120" width="70" height="130" style="shape-rendering: crispEdges;">
-        <!-- Head -->
-        <rect x="22" y="10" width="16" height="16" fill="#110d18" stroke="#000" stroke-width="1"/>
-        <!-- Glowing Purple Eyes -->
-        <rect x="24" y="18" width="4" height="2" fill="#d946ef" filter="drop-shadow(0 0 4px #c084fc)"/>
-        <rect x="25" y="18" width="2" height="2" fill="#ffffff"/>
-        <rect x="32" y="18" width="4" height="2" fill="#d946ef" filter="drop-shadow(0 0 4px #c084fc)"/>
-        <rect x="33" y="18" width="2" height="2" fill="#ffffff"/>
-        <!-- Body -->
-        <rect x="26" y="26" width="8" height="28" fill="#0d0914"/>
-        <!-- Legs -->
-        <rect x="26" y="54" width="3" height="60" fill="#09060f"/>
-        <rect x="31" y="54" width="3" height="60" fill="#09060f"/>
-        <!-- Long Slender Arms Holding Block -->
-        <rect x="18" y="26" width="3" height="42" fill="#0d0914" transform="rotate(-15, 18, 26)"/>
-        <rect x="39" y="26" width="3" height="42" fill="#0d0914" transform="rotate(15, 39, 26)"/>
-        <!-- Carried Block (Grass Block in arms) -->
-        <g transform="translate(18, 48)">
-          <polygon points="12,0 24,6 12,12 0,6" fill="#5b8e32"/>
-          <polygon points="0,6 12,12 12,24 0,18" fill="#866043"/>
-          <polygon points="12,12 24,6 24,18 12,24" fill="#5c3f29"/>
-        </g>
-      </svg>
-    </div>
-  </div>
-
-  <!-- Discreet Skip Button -->
-  <button class="build-skip-btn" id="buildSkipBtn" onclick="skipBuildAnimation()">[ESC] Skip</button>
-
-  <!-- =========================================================
        DESKTOP WIDESCREEN LEFT FLANK
        "The Nether & Deepslate Mines"
        ========================================================= -->
   <aside class="mc-flank mc-flank-left" aria-hidden="true">
+    <!-- Hanging Soul Lantern with Animated Flicker -->
     <div class="soul-lantern-wrap">
       <div class="chain-link"></div>
       <div class="chain-link"></div>
       <div class="chain-link"></div>
       <svg class="soul-lantern" viewBox="0 0 32 40" width="36" height="45">
+        <!-- Lantern Cap / Iron Casing -->
         <rect x="13" y="2" width="6" height="4" fill="#334155" stroke="#0f172a" stroke-width="1"/>
         <polygon points="6,6 26,6 23,12 9,12" fill="#475569" stroke="#0f172a" stroke-width="1"/>
+        <!-- Glass Chamber -->
         <rect x="8" y="12" width="16" height="20" fill="rgba(14, 165, 233, 0.25)" stroke="#1e293b" stroke-width="1"/>
+        <!-- Pulsing Soul Flame -->
         <circle cx="16" cy="22" r="6" fill="#38bdf8" opacity="0.9"/>
         <ellipse cx="16" cy="20" rx="3.5" ry="5.5" fill="#bae6fd"/>
         <circle cx="16" cy="18" r="2" fill="#ffffff"/>
+        <!-- Lantern Base -->
         <polygon points="7,32 25,32 27,38 5,38" fill="#334155" stroke="#0f172a" stroke-width="1"/>
       </svg>
     </div>
 
+    <!-- Nether Portal with Swirling Animated Vortex -->
     <div class="nether-portal-card" title="Nether Portal">
       <div class="portal-field"></div>
       <div class="portal-spark portal-spark-1"></div>
       <div class="portal-spark portal-spark-2"></div>
       <div class="portal-spark portal-spark-3"></div>
+      <!-- Obsidian Frame Corner Accents -->
       <svg viewBox="0 0 130 180" width="100%" height="100%" style="position:absolute; inset:0; pointer-events:none;">
         <rect x="0" y="0" width="130" height="180" fill="none" stroke="#3b1d54" stroke-width="6"/>
         <line x1="0" y1="0" x2="20" y2="20" stroke="#581c87" stroke-width="2"/>
@@ -1320,13 +1120,17 @@
       </svg>
     </div>
 
+    <!-- Deepslate Ore Pedestal (Diamond & Redstone Ores) -->
     <div class="ore-column-wrap">
+      <!-- Diamond Ore Block SVG -->
       <svg class="ore-block" viewBox="0 0 32 32" width="60" height="60" style="shape-rendering:crispEdges;" title="Diamond Ore">
+        <!-- Deepslate stone base -->
         <rect width="32" height="32" fill="#1e293b"/>
         <rect x="2" y="2" width="28" height="28" fill="#334155"/>
         <rect x="5" y="8" width="8" height="4" fill="#1e293b"/>
         <rect x="18" y="16" width="10" height="4" fill="#1e293b"/>
         <rect x="12" y="24" width="8" height="4" fill="#1e293b"/>
+        <!-- Diamond Crystals -->
         <rect x="6" y="5" width="4" height="4" fill="#38bdf8"/>
         <rect x="8" y="7" width="2" height="2" fill="#bae6fd"/>
         <rect x="20" y="8" width="5" height="4" fill="#38bdf8"/>
@@ -1337,12 +1141,14 @@
         <rect x="24" y="23" width="2" height="2" fill="#bae6fd"/>
       </svg>
 
+      <!-- Redstone Ore Block SVG (Glowing) -->
       <svg class="ore-block" viewBox="0 0 32 32" width="60" height="60" style="shape-rendering:crispEdges;" title="Redstone Ore">
         <rect width="32" height="32" fill="#1e293b"/>
         <rect x="2" y="2" width="28" height="28" fill="#2d3748"/>
         <rect x="4" y="12" width="10" height="4" fill="#1e293b"/>
         <rect x="16" y="6" width="8" height="4" fill="#1e293b"/>
         <rect x="14" y="22" width="12" height="4" fill="#1e293b"/>
+        <!-- Redstone Specks -->
         <rect class="torch-head" x="8" y="7" width="5" height="4" fill="#ef4444"/>
         <rect x="9" y="8" width="2" height="2" fill="#fca5a5"/>
         <rect class="torch-head" x="18" y="14" width="6" height="5" fill="#ef4444"/>
@@ -1358,32 +1164,41 @@
        "The Celestial Beacon & Enchantment Island"
        ========================================================= -->
   <aside class="mc-flank mc-flank-right" aria-hidden="true">
+    <!-- Minecraft Beacon with Skyward Beam & Pulse Rings -->
     <div class="beacon-column-wrap">
       <div class="beacon-sky-beam"></div>
       <div class="beacon-pulse-ring"></div>
       <div class="beacon-pulse-ring"></div>
       <div class="beacon-pulse-ring"></div>
 
+      <!-- Beacon Base Block & Core -->
       <svg viewBox="0 0 64 64" width="72" height="72" style="position:relative; z-index:2; margin-top:20px;">
+        <!-- Obsidian Plinth -->
         <rect x="10" y="44" width="44" height="16" rx="2" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+        <!-- Glass Beacon Housing -->
         <rect x="14" y="16" width="36" height="30" rx="3" fill="rgba(186, 230, 253, 0.25)" stroke="#7dd3fc" stroke-width="2"/>
         <line x1="16" y1="18" x2="24" y2="18" stroke="#ffffff" stroke-width="1.5"/>
+        <!-- Nether Star Core (Radiating) -->
         <polygon points="32,22 36,28 42,31 36,34 32,40 28,34 22,31 28,28" fill="#ffffff" filter="drop-shadow(0 0 8px #38bdf8)"/>
       </svg>
     </div>
 
+    <!-- Enchanting Table with Floating Galactic Alphabet Runes -->
     <div class="enchanting-table-wrap" title="Enchanting Table">
       <div class="galactic-rune rune-1">ᔑ</div>
       <div class="galactic-rune rune-2">ʖ</div>
       <div class="galactic-rune rune-3">ℸ</div>
 
       <svg viewBox="0 0 64 64" width="70" height="70">
+        <!-- Obsidian Table Body -->
         <polygon points="10,32 32,22 54,32 32,42" fill="#991b1b" stroke="#450a0a" stroke-width="1.5"/>
         <polygon points="10,32 32,42 32,58 10,48" fill="#090d16" stroke="#1e293b" stroke-width="1.5"/>
         <polygon points="54,32 32,42 32,58 54,48" fill="#1e293b" stroke="#090d16" stroke-width="1.5"/>
+        <!-- Diamond Corners -->
         <polygon points="32,22 34,23 32,24 30,23" fill="#38bdf8"/>
         <polygon points="10,32 12,33 10,34 8,33" fill="#38bdf8"/>
         <polygon points="54,32 56,33 54,34 52,33" fill="#38bdf8"/>
+        <!-- Hovering Open Book -->
         <g style="animation: mcFloat 2.6s infinite ease-in-out;">
           <polygon points="20,18 32,22 32,15 20,12" fill="#e2e8f0" stroke="#78350f" stroke-width="1"/>
           <polygon points="44,18 32,22 32,15 44,12" fill="#f8fafc" stroke="#78350f" stroke-width="1"/>
@@ -1392,11 +1207,14 @@
       </svg>
     </div>
 
+    <!-- Floating Island Overworld Vines & Glow Berries -->
     <div class="glow-berries-cluster" title="Lush Cave Glow Berries">
       <svg viewBox="0 0 40 60" width="44" height="66">
+        <!-- Hanging Vine Stems -->
         <path d="M20,0 Q24,15 18,30 T22,60" fill="none" stroke="#16a34a" stroke-width="2.5"/>
         <path d="M22,12 Q28,14 30,10" fill="none" stroke="#22c55e" stroke-width="2"/>
         <path d="M16,36 Q10,38 8,34" fill="none" stroke="#22c55e" stroke-width="2"/>
+        <!-- Glowing Berries -->
         <circle cx="21" cy="22" r="5" fill="#f97316"/>
         <circle cx="20" cy="21" r="2" fill="#fef08a"/>
         <circle cx="16" cy="46" r="4.5" fill="#f97316"/>
@@ -1409,227 +1227,225 @@
        MAIN CONTENT CONTAINER
        ========================================================= -->
   <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="title-group">
+        <!-- Handcrafted Animated Floating 3D Grass Block -->
+        <div class="mc-floating-block-wrap" title="Minecraft Bedrock Proxy Stack">
+          <svg class="mc-block-svg" viewBox="0 0 32 32" width="42" height="42">
+            <g>
+              <!-- Isometric Grass Block Top -->
+              <polygon points="16,2 30,9 16,16 2,9" fill="#5b8e32"/>
+              <polygon points="16,2 23,5.5 16,9 9,5.5" fill="#76b33f"/>
+              <polygon points="12,5 18,8 15,9.5 9,6.5" fill="#477026"/>
+              <!-- Left Dirt Face -->
+              <polygon points="2,9 16,16 16,30 2,23" fill="#866043"/>
+              <polygon points="2,9 16,16 16,20 2,13" fill="#5b8e32"/>
+              <polygon points="4,11 7,12.5 7,15 4,13.5" fill="#477026"/>
+              <polygon points="10,14 13,15.5 13,18 10,16.5" fill="#5b8e32"/>
+              <polygon points="4,17 7,18.5 7,21 4,19.5" fill="#5c3f29"/>
+              <polygon points="10,20 13,21.5 13,24 10,22.5" fill="#5c3f29"/>
+              <!-- Right Shaded Dirt Face -->
+              <polygon points="16,16 30,9 30,23 16,30" fill="#684931"/>
+              <polygon points="16,16 30,9 30,13 16,20" fill="#446b24"/>
+              <polygon points="18,17 21,15.5 21,18 18,19.5" fill="#33521b"/>
+              <polygon points="24,14 27,12.5 27,15 24,16.5" fill="#446b24"/>
+              <polygon points="18,22 21,20.5 21,23 18,24.5" fill="#47301f"/>
+              <polygon points="24,19 27,17.5 27,20 24,21.5" fill="#47301f"/>
+            </g>
+          </svg>
+          <div class="mc-block-shadow"></div>
+        </div>
 
-    <!-- CHUNK 1: Header & Proxy Status -->
-    <div class="portal-chunk" id="chunkHeader">
-      <!-- Header -->
-      <header>
-        <div class="title-group">
-          <!-- Handcrafted Animated Floating 3D Grass Block -->
-          <div class="mc-floating-block-wrap" title="Minecraft Bedrock Proxy Stack">
-            <svg class="mc-block-svg" viewBox="0 0 32 32" width="42" height="42">
+        <div>
+          <h1>Bedrock Proxy Portal</h1>
+          <div class="subtitle">Custom Server Menu & Xbox Live Friend Gateway</div>
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-secondary" onclick="openLogsModal()">
+          <svg class="mc-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+          Proxy Logs
+        </button>
+      </div>
+    </header>
+
+    <!-- Proxy Container Status Card -->
+    <div class="card" id="proxyCard">
+      <div class="status-bar">
+        <div style="display:flex; align-items:center; gap: 14px; flex-wrap: wrap;">
+          <div class="status-badge">
+            <span class="status-dot" id="proxyDot"></span>
+            <span id="proxyStatusText">CHECKING PROXY...</span>
+          </div>
+          <span id="proxyDetails" style="font-size: 0.88rem; color: var(--mc-text-muted); font-family: var(--font-mono);"></span>
+        </div>
+        <div class="status-bar-buttons" style="display:flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="checkProxyStatus()">🔄 Refresh</button>
+          <button class="btn btn-danger btn-sm" id="btnRestart" onclick="restartProxy()">⚡ Restart Proxy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Xbox Live Friend Broadcaster Card (mcxboxbroadcast) -->
+    <div class="card card-emerald-glow" id="xboxCard">
+      <div class="status-bar">
+        <div>
+          <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
+            <!-- Eye of Ender Icon -->
+            <svg class="mc-icon mc-ender-eye" viewBox="0 0 24 24" width="22" height="22">
+              <circle cx="12" cy="12" r="10" fill="#043933" stroke="#0f766e" stroke-width="1.5"/>
+              <circle cx="12" cy="12" r="7" fill="#0d9488"/>
+              <circle cx="12" cy="12" r="4.5" fill="#2dd4bf"/>
+              <ellipse cx="12" cy="12" rx="2" ry="4" fill="#042f2e"/>
+              <circle cx="11" cy="10" r="1.2" fill="#ccfbf1"/>
+            </svg>
+            <div class="card-title">Xbox Live Friend Broadcaster</div>
+            <div class="status-badge" style="padding: 4px 10px;">
+              <span class="status-dot" id="xboxDot"></span>
+              <span id="xboxStatusText">CHECKING...</span>
+            </div>
+          </div>
+          <div class="subtitle" style="margin-top: 5px;">
+            Broadcasts your proxy as a joinable Xbox Live friend so console & mobile players can join without LAN or DNS tricks!
+          </div>
+        </div>
+        <div class="xbox-action-buttons" style="display:flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="openXboxSettingsModal()">⚙️ Setup</button>
+          <button class="btn btn-secondary btn-sm" onclick="openXboxLogsModal()">📜 Logs</button>
+          <button class="btn btn-secondary btn-sm" onclick="reauthXbox()" title="Clear login and generate new link code">🔄 Re-auth</button>
+          <button class="btn btn-danger btn-sm" id="btnRestartXbox" onclick="restartXbox()">⚡ Restart Bot</button>
+        </div>
+      </div>
+
+      <!-- Xbox Auth Code Alert (Shown when login is required) -->
+      <div id="xboxAuthBanner" class="xbox-auth-box" style="display:none;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <strong style="color: var(--mc-gold); font-size: 1rem; display:flex; align-items:center; gap:8px;">
+              <svg class="mc-icon mc-redstone-torch" viewBox="0 0 24 24" width="20" height="20">
+                <rect x="10.5" y="10" width="3" height="11" fill="#78350f"/>
+                <rect class="torch-head" x="9.5" y="4" width="5" height="6" rx="1" fill="#ef4444"/>
+                <rect x="10.5" y="5" width="3" height="3" fill="#fca5a5"/>
+              </svg>
+              Microsoft Account Link Required!
+            </strong>
+            <div style="font-size: 0.92rem; margin-top: 8px; color: var(--mc-text);">
+              1. Open <a id="xboxAuthUrlLink" href="https://www.microsoft.com/link" target="_blank" style="color: var(--mc-diamond); text-decoration: underline; font-weight:600;">https://www.microsoft.com/link</a><br>
+              2. Enter code:
+              <span id="xboxAuthCodeDisplay" class="code-display"></span>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="copyAuthCode()">📋 Copy Code</button>
+            <a id="xboxAuthBtn" href="https://www.microsoft.com/link" target="_blank" class="btn btn-primary btn-sm">🔗 Open Login Page</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Join Links & Share Section (Shown when active) -->
+      <div id="xboxJoinSection" style="margin-top: 16px; padding: 14px 18px; background: var(--mc-card-inner); border: 1px solid var(--mc-border); border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="display:flex; align-items:center; gap: 8px; flex-wrap: wrap;">
+              <!-- Redstone Torch Status Indicator -->
+              <svg class="mc-icon mc-redstone-torch" viewBox="0 0 24 24" width="18" height="18" title="Active Redstone Signal">
+                <rect x="10.5" y="10" width="3" height="11" fill="#78350f"/>
+                <rect class="torch-head" x="9.5" y="4" width="5" height="6" rx="1" fill="#ef4444"/>
+                <rect x="10.5" y="5" width="3" height="3" fill="#fca5a5"/>
+              </svg>
+              <span style="font-size:0.88rem; color:var(--mc-text-muted);">Bot Gamertag:</span>
+              <strong id="xboxGamertagDisplay" style="color:var(--mc-diamond); font-size: 1.05rem;">Not set</strong>
+              <span id="xboxAdvertisedIp" style="font-size:0.84rem; color:var(--mc-text-muted); font-family:var(--font-mono); margin-left: 6px;"></span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--mc-text-muted); margin-top: 4px;">
+              Share this gamertag with friends. Once added on Xbox, your proxy appears directly under their Minecraft <strong>Friends</strong> tab!
+            </div>
+          </div>
+          <div class="xbox-share-buttons" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a id="xboxProfileBtn" href="#" target="_blank" class="btn btn-secondary btn-sm" style="display:none;">👤 Add on Xbox</a>
+            <button class="btn btn-emerald btn-sm" onclick="copyInviteMessage()">📋 Copy Invite for Friends</button>
+            <a id="minecraftDirectBtn" href="#" class="btn btn-secondary btn-sm" style="display:none;">📱 One-Tap Bedrock Join</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Server List Management Card -->
+    <div class="card" id="serversCard">
+      <div class="server-list-header">
+        <div>
+          <div class="card-title">
+            <!-- Minecraft Chest Icon -->
+            <svg class="mc-icon mc-chest" viewBox="0 0 24 24" width="22" height="22">
+              <rect x="3" y="5" width="18" height="15" rx="1.5" fill="#92400e" stroke="#451a03" stroke-width="1.5"/>
+              <line x1="3" y1="10" x2="21" y2="10" stroke="#451a03" stroke-width="1.5"/>
+              <line x1="4.5" y1="6.5" x2="19.5" y2="6.5" stroke="#b45309" stroke-width="1"/>
+              <rect class="chest-latch" x="10.5" y="8.5" width="3" height="4" rx="0.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="0.8"/>
+            </svg>
+            Available Servers
+          </div>
+          <div class="subtitle">These servers are displayed inside the in-game Bedrock menu</div>
+        </div>
+        <div style="display:flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="pingAllServers()">
+            <!-- Emerald Icon -->
+            <svg class="mc-icon mc-emerald-gem" viewBox="0 0 24 24" width="16" height="16">
+              <polygon points="12,2 19,6 19,18 12,22 5,18 5,6" fill="#10b981" stroke="#047857" stroke-width="1.2"/>
+              <polygon points="12,5 16,8 16,16 12,19 8,16 8,8" fill="#34d399"/>
+              <polygon points="12,5 14,7 12,9 10,7" fill="#a7f3d0"/>
+            </svg>
+            Ping All
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+            <!-- Diamond Pickaxe Icon -->
+            <svg class="mc-icon mc-pickaxe" viewBox="0 0 24 24" width="18" height="18">
               <g>
-                <polygon points="16,2 30,9 16,16 2,9" fill="#5b8e32"/>
-                <polygon points="16,2 23,5.5 16,9 9,5.5" fill="#76b33f"/>
-                <polygon points="12,5 18,8 15,9.5 9,6.5" fill="#477026"/>
-                <polygon points="2,9 16,16 16,30 2,23" fill="#866043"/>
-                <polygon points="2,9 16,16 16,20 2,13" fill="#5b8e32"/>
-                <polygon points="4,11 7,12.5 7,15 4,13.5" fill="#477026"/>
-                <polygon points="10,14 13,15.5 13,18 10,16.5" fill="#5b8e32"/>
-                <polygon points="4,17 7,18.5 7,21 4,19.5" fill="#5c3f29"/>
-                <polygon points="10,20 13,21.5 13,24 10,22.5" fill="#5c3f29"/>
-                <polygon points="16,16 30,9 30,23 16,30" fill="#684931"/>
-                <polygon points="16,16 30,9 30,13 16,20" fill="#446b24"/>
-                <polygon points="18,17 21,15.5 21,18 18,19.5" fill="#33521b"/>
-                <polygon points="24,14 27,12.5 27,15 24,16.5" fill="#446b24"/>
-                <polygon points="18,22 21,20.5 21,23 18,24.5" fill="#47301f"/>
-                <polygon points="24,19 27,17.5 27,20 24,21.5" fill="#47301f"/>
+                <line x1="5" y1="19" x2="15" y2="9" stroke="#78350f" stroke-width="2.5"/>
+                <line x1="5.5" y1="18.5" x2="14.5" y2="9.5" stroke="#92400e" stroke-width="1"/>
+                <path d="M12 4 Q17 5 20 12 L18 14 Q15 9 10 7 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+                <circle cx="16" cy="8" r="1" fill="#bae6fd"/>
               </g>
             </svg>
-            <div class="mc-block-shadow"></div>
-          </div>
-
-          <div>
-            <h1>Bedrock Proxy Portal</h1>
-            <div class="subtitle">Custom Server Menu & Xbox Live Friend Gateway</div>
-          </div>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <button class="btn btn-secondary" onclick="playEndermanBuildAnimation(true)" title="Replay Enderman Grid Build Animation">
-            👾 Replay Build
-          </button>
-          <button class="btn btn-secondary" onclick="openLogsModal()">
-            <svg class="mc-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-            </svg>
-            Proxy Logs
+            Add Server
           </button>
         </div>
-      </header>
+      </div>
 
-      <!-- Proxy Container Status Card -->
-      <div class="card" id="proxyCard">
-        <div class="status-bar">
-          <div style="display:flex; align-items:center; gap: 14px; flex-wrap: wrap;">
-            <div class="status-badge">
-              <span class="status-dot" id="proxyDot"></span>
-              <span id="proxyStatusText">CHECKING PROXY...</span>
+      <!-- Minecraft Experience (XP) Bar Counter -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+        <span style="font-size: 0.85rem; color: var(--mc-text-muted);">Configured Realms & Proxies:</span>
+        <div class="mc-xp-container">
+          <div class="mc-xp-bar">
+            <div class="mc-xp-fill" id="xpFillBar" style="width: 100%;"></div>
+            <div class="mc-xp-notches">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
             </div>
-            <span id="proxyDetails" style="font-size: 0.88rem; color: var(--mc-text-muted); font-family: var(--font-mono);"></span>
           </div>
-          <div class="status-bar-buttons" style="display:flex; gap: 8px;">
-            <button class="btn btn-secondary btn-sm" onclick="checkProxyStatus()">🔄 Refresh</button>
-            <button class="btn btn-danger btn-sm" id="btnRestart" onclick="restartProxy()">⚡ Restart Proxy</button>
-          </div>
+          <div class="mc-xp-level" id="xpLevelNumber" title="Total Servers Available">0</div>
         </div>
       </div>
-    </div>
 
-    <!-- CHUNK 2: Xbox Live Friend Broadcaster Card -->
-    <div class="portal-chunk" id="chunkXbox">
-      <div class="card card-emerald-glow" id="xboxCard">
-        <div class="status-bar">
-          <div>
-            <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
-              <!-- Eye of Ender Icon -->
-              <svg class="mc-icon mc-ender-eye" viewBox="0 0 24 24" width="22" height="22">
-                <circle cx="12" cy="12" r="10" fill="#043933" stroke="#0f766e" stroke-width="1.5"/>
-                <circle cx="12" cy="12" r="7" fill="#0d9488"/>
-                <circle cx="12" cy="12" r="4.5" fill="#2dd4bf"/>
-                <ellipse cx="12" cy="12" rx="2" ry="4" fill="#042f2e"/>
-                <circle cx="11" cy="10" r="1.2" fill="#ccfbf1"/>
-              </svg>
-              <div class="card-title">Xbox Live Friend Broadcaster</div>
-              <div class="status-badge" style="padding: 4px 10px;">
-                <span class="status-dot" id="xboxDot"></span>
-                <span id="xboxStatusText">CHECKING...</span>
-              </div>
-            </div>
-            <div class="subtitle" style="margin-top: 5px;">
-              Broadcasts your proxy as a joinable Xbox Live friend so console & mobile players can join without LAN or DNS tricks!
-            </div>
-          </div>
-          <div class="xbox-action-buttons" style="display:flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn btn-secondary btn-sm" onclick="openXboxSettingsModal()">⚙️ Setup</button>
-            <button class="btn btn-secondary btn-sm" onclick="openXboxLogsModal()">📜 Logs</button>
-            <button class="btn btn-secondary btn-sm" onclick="reauthXbox()" title="Clear login and generate new link code">🔄 Re-auth</button>
-            <button class="btn btn-danger btn-sm" id="btnRestartXbox" onclick="restartXbox()">⚡ Restart Bot</button>
-          </div>
-        </div>
-
-        <!-- Xbox Auth Code Alert -->
-        <div id="xboxAuthBanner" class="xbox-auth-box" style="display:none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-            <div>
-              <strong style="color: var(--mc-gold); font-size: 1rem; display:flex; align-items:center; gap:8px;">
-                <svg class="mc-icon mc-redstone-torch" viewBox="0 0 24 24" width="20" height="20">
-                  <rect x="10.5" y="10" width="3" height="11" fill="#78350f"/>
-                  <rect class="torch-head" x="9.5" y="4" width="5" height="6" rx="1" fill="#ef4444"/>
-                  <rect x="10.5" y="5" width="3" height="3" fill="#fca5a5"/>
-                </svg>
-                Microsoft Account Link Required!
-              </strong>
-              <div style="font-size: 0.92rem; margin-top: 8px; color: var(--mc-text);">
-                1. Open <a id="xboxAuthUrlLink" href="https://www.microsoft.com/link" target="_blank" style="color: var(--mc-diamond); text-decoration: underline; font-weight:600;">https://www.microsoft.com/link</a><br>
-                2. Enter code:
-                <span id="xboxAuthCodeDisplay" class="code-display"></span>
-              </div>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <button class="btn btn-secondary btn-sm" onclick="copyAuthCode()">📋 Copy Code</button>
-              <a id="xboxAuthBtn" href="https://www.microsoft.com/link" target="_blank" class="btn btn-primary btn-sm">🔗 Open Login Page</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Join Links & Share Section -->
-        <div id="xboxJoinSection" style="margin-top: 16px; padding: 14px 18px; background: var(--mc-card-inner); border: 1px solid var(--mc-border); border-radius: 8px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-            <div>
-              <div style="display:flex; align-items:center; gap: 8px; flex-wrap: wrap;">
-                <svg class="mc-icon mc-redstone-torch" viewBox="0 0 24 24" width="18" height="18" title="Active Redstone Signal">
-                  <rect x="10.5" y="10" width="3" height="11" fill="#78350f"/>
-                  <rect class="torch-head" x="9.5" y="4" width="5" height="6" rx="1" fill="#ef4444"/>
-                  <rect x="10.5" y="5" width="3" height="3" fill="#fca5a5"/>
-                </svg>
-                <span style="font-size:0.88rem; color:var(--mc-text-muted);">Bot Gamertag:</span>
-                <strong id="xboxGamertagDisplay" style="color:var(--mc-diamond); font-size: 1.05rem;">Not set</strong>
-                <span id="xboxAdvertisedIp" style="font-size:0.84rem; color:var(--mc-text-muted); font-family:var(--font-mono); margin-left: 6px;"></span>
-              </div>
-              <div style="font-size: 0.85rem; color: var(--mc-text-muted); margin-top: 4px;">
-                Share this gamertag with friends. Once added on Xbox, your proxy appears directly under their Minecraft <strong>Friends</strong> tab!
-              </div>
-            </div>
-            <div class="xbox-share-buttons" style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <a id="xboxProfileBtn" href="#" target="_blank" class="btn btn-secondary btn-sm" style="display:none;">👤 Add on Xbox</a>
-              <button class="btn btn-emerald btn-sm" onclick="copyInviteMessage()">📋 Copy Invite for Friends</button>
-              <a id="minecraftDirectBtn" href="#" class="btn btn-secondary btn-sm" style="display:none;">📱 One-Tap Bedrock Join</a>
-            </div>
-          </div>
-        </div>
+      <div id="serverListContainer">
+        <div class="empty-state">Loading servers...</div>
       </div>
-    </div>
 
-    <!-- CHUNK 3: Server List Management Card -->
-    <div class="portal-chunk" id="chunkServers">
-      <div class="card" id="serversCard">
-        <div class="server-list-header">
-          <div>
-            <div class="card-title">
-              <svg class="mc-icon mc-chest" viewBox="0 0 24 24" width="22" height="22">
-                <rect x="3" y="5" width="18" height="15" rx="1.5" fill="#92400e" stroke="#451a03" stroke-width="1.5"/>
-                <line x1="3" y1="10" x2="21" y2="10" stroke="#451a03" stroke-width="1.5"/>
-                <line x1="4.5" y1="6.5" x2="19.5" y2="6.5" stroke="#b45309" stroke-width="1"/>
-                <rect class="chest-latch" x="10.5" y="8.5" width="3" height="4" rx="0.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="0.8"/>
-              </svg>
-              Available Servers
-            </div>
-            <div class="subtitle">These servers are displayed inside the in-game Bedrock menu</div>
-          </div>
-          <div style="display:flex; gap: 8px;">
-            <button class="btn btn-secondary btn-sm" onclick="pingAllServers()">
-              <svg class="mc-icon mc-emerald-gem" viewBox="0 0 24 24" width="16" height="16">
-                <polygon points="12,2 19,6 19,18 12,22 5,18 5,6" fill="#10b981" stroke="#047857" stroke-width="1.2"/>
-                <polygon points="12,5 16,8 16,16 12,19 8,16 8,8" fill="#34d399"/>
-                <polygon points="12,5 14,7 12,9 10,7" fill="#a7f3d0"/>
-              </svg>
-              Ping All
-            </button>
-            <button class="btn btn-primary btn-sm" onclick="openAddModal()">
-              <svg class="mc-icon mc-pickaxe" viewBox="0 0 24 24" width="18" height="18">
-                <g>
-                  <line x1="5" y1="19" x2="15" y2="9" stroke="#78350f" stroke-width="2.5"/>
-                  <line x1="5.5" y1="18.5" x2="14.5" y2="9.5" stroke="#92400e" stroke-width="1"/>
-                  <path d="M12 4 Q17 5 20 12 L18 14 Q15 9 10 7 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
-                  <circle cx="16" cy="8" r="1" fill="#bae6fd"/>
-                </g>
-              </svg>
-              Add Server
-            </button>
-          </div>
-        </div>
-
-        <!-- Experience (XP) Bar Counter -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
-          <span style="font-size: 0.85rem; color: var(--mc-text-muted);">Configured Realms & Proxies:</span>
-          <div class="mc-xp-container">
-            <div class="mc-xp-bar">
-              <div class="mc-xp-fill" id="xpFillBar" style="width: 100%;"></div>
-              <div class="mc-xp-notches">
-                <span></span><span></span><span></span><span></span><span></span>
-                <span></span><span></span><span></span><span></span><span></span>
-              </div>
-            </div>
-            <div class="mc-xp-level" id="xpLevelNumber" title="Total Servers Available">0</div>
-          </div>
-        </div>
-
-        <div id="serverListContainer">
-          <div class="empty-state">Loading servers...</div>
-        </div>
-
-        <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--mc-border); padding-top: 16px; flex-wrap: wrap; gap: 12px;">
-          <span style="font-size: 0.88rem; font-weight:600; color: var(--mc-gold);" id="unsavedNotice"></span>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button class="btn btn-secondary" id="btnSaveOnly" onclick="saveServers(false)">💾 Save Changes</button>
-            <button class="btn btn-emerald" id="btnSaveRestart" onclick="saveServers(true)">🚀 Save & Restart Proxy</button>
-          </div>
+      <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--mc-border); padding-top: 16px; flex-wrap: wrap; gap: 12px;">
+        <span style="font-size: 0.88rem; font-weight:600; color: var(--mc-gold);" id="unsavedNotice"></span>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-secondary" id="btnSaveOnly" onclick="saveServers(false)">💾 Save Changes</button>
+          <button class="btn btn-emerald" id="btnSaveRestart" onclick="saveServers(true)">🚀 Save & Restart Proxy</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Mobile Minecraft Inventory Hotbar Dock (< 768px) -->
+  <!-- =========================================================
+       MOBILE MINECRAFT INVENTORY HOTBAR DOCK (< 768px)
+       ========================================================= -->
   <nav class="mc-mobile-hotbar" aria-label="Quick Actions">
     <a href="#serversCard" class="hotbar-slot" title="Servers List">
       <svg class="mc-icon mc-chest" viewBox="0 0 24 24" width="18" height="18">
@@ -1776,287 +1592,6 @@
     let authToken = '';
     let currentXboxDetails = null;
 
-    // Web Audio Synthesizer for 8-bit Minecraft Sound Effects
-    let audioCtx = null;
-    function playMinecraftSound(type) {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        if (type === 'teleport') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(450, now);
-          osc.frequency.exponentialRampToValueAtTime(140, now + 0.22);
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-          osc.start(now);
-          osc.stop(now + 0.22);
-        } else if (type === 'place') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(120, now);
-          osc.frequency.exponentialRampToValueAtTime(40, now + 0.12);
-          gain.gain.setValueAtTime(0.35, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-          osc.start(now);
-          osc.stop(now + 0.12);
-        } else if (type === 'complete') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(523.25, now); // C5
-          osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
-          osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.32);
-          osc.start(now);
-          osc.stop(now + 0.32);
-        }
-      } catch (e) {}
-    }
-
-    // =========================================================
-    // ENDERMAN CHUNK BUILD ANIMATION ENGINE
-    // =========================================================
-    let isBuilding = false;
-    let buildAnimationTimer = null;
-
-    function alignTarget(targetId, sourceEl) {
-      const target = document.getElementById(targetId);
-      const rect = sourceEl.getBoundingClientRect();
-      const parentRect = document.getElementById('buildOverlay').getBoundingClientRect();
-
-      target.style.top = (rect.top - parentRect.top) + 'px';
-      target.style.left = (rect.left - parentRect.left) + 'px';
-      target.style.width = rect.width + 'px';
-      target.style.height = rect.height + 'px';
-    }
-
-    function spawnTeleportParticles(x, y) {
-      const burst = document.createElement('div');
-      burst.className = 'teleport-burst';
-      burst.style.left = x + 'px';
-      burst.style.top = y + 'px';
-
-      for (let i = 0; i < 14; i++) {
-        const p = document.createElement('div');
-        p.className = 'tp-particle';
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 30 + Math.random() * 45;
-        p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
-        p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
-        burst.appendChild(p);
-      }
-      document.getElementById('buildOverlay').appendChild(burst);
-      setTimeout(() => burst.remove(), 700);
-    }
-
-    function spawnDustPuff(x, y) {
-      const puff = document.createElement('div');
-      puff.className = 'block-dust-puff';
-      puff.style.left = x + 'px';
-      puff.style.top = y + 'px';
-
-      for (let i = 0; i < 10; i++) {
-        const d = document.createElement('div');
-        d.className = 'dust-cube';
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 20 + Math.random() * 35;
-        d.style.setProperty('--pdx', `${Math.cos(angle) * dist}px`);
-        d.style.setProperty('--pdy', `${Math.sin(angle) * dist}px`);
-        puff.appendChild(d);
-      }
-      document.getElementById('buildOverlay').appendChild(puff);
-      setTimeout(() => puff.remove(), 600);
-    }
-
-    function skipBuildAnimation() {
-      if (!isBuilding) return;
-      isBuilding = false;
-      clearTimeout(buildAnimationTimer);
-
-      const overlay = document.getElementById('buildOverlay');
-      const grid = document.getElementById('chunkGrid');
-      const enderman = document.getElementById('endermanActor');
-      const skipBtn = document.getElementById('buildSkipBtn');
-
-      overlay.classList.remove('active');
-      grid.classList.remove('visible');
-      enderman.classList.remove('visible');
-      skipBtn.classList.remove('visible');
-
-      ['targetHeader', 'targetXbox', 'targetServers'].forEach(id => {
-        const el = document.getElementById(id);
-        el.className = 'grid-target-box';
-      });
-
-      ['chunkHeader', 'chunkXbox', 'chunkServers'].forEach(id => {
-        const el = document.getElementById(id);
-        el.className = 'portal-chunk';
-      });
-
-      sessionStorage.setItem('mc_build_intro_played', '1');
-    }
-
-    async function playEndermanBuildAnimation(force = false) {
-      if (isBuilding) return;
-      if (!force && sessionStorage.getItem('mc_build_intro_played')) {
-        return; // Already played in this session
-      }
-
-      isBuilding = true;
-      const overlay = document.getElementById('buildOverlay');
-      const grid = document.getElementById('chunkGrid');
-      const enderman = document.getElementById('endermanActor');
-      const skipBtn = document.getElementById('buildSkipBtn');
-
-      const chunkHeader = document.getElementById('chunkHeader');
-      const chunkXbox = document.getElementById('chunkXbox');
-      const chunkServers = document.getElementById('chunkServers');
-
-      // Scroll to top
-      window.scrollTo({ top: 0, behavior: 'instant' });
-
-      // Align targets
-      alignTarget('targetHeader', chunkHeader);
-      alignTarget('targetXbox', chunkXbox);
-      alignTarget('targetServers', chunkServers);
-
-      // Hide chunks & activate grid
-      chunkHeader.classList.add('chunk-hidden');
-      chunkXbox.classList.add('chunk-hidden');
-      chunkServers.classList.add('chunk-hidden');
-
-      overlay.classList.add('active');
-      grid.classList.add('visible');
-      skipBtn.classList.add('visible');
-
-      document.getElementById('targetHeader').classList.add('active');
-      document.getElementById('targetXbox').classList.add('active');
-      document.getElementById('targetServers').classList.add('active');
-
-      await new Promise(r => setTimeout(r, 400));
-      if (!isBuilding) return;
-
-      // 1. ENDERMAN TELEPORT -> ZONE 1 (Header/Proxy)
-      const targetHeaderRect = document.getElementById('targetHeader').getBoundingClientRect();
-      const parentRect = overlay.getBoundingClientRect();
-      const z1X = (targetHeaderRect.left - parentRect.left) + (targetHeaderRect.width / 2);
-      const z1Y = (targetHeaderRect.top - parentRect.top) + 20;
-
-      spawnTeleportParticles(z1X, z1Y);
-      playMinecraftSound('teleport');
-
-      enderman.style.left = z1X + 'px';
-      enderman.style.top = z1Y + 'px';
-      enderman.classList.add('visible');
-
-      await new Promise(r => setTimeout(r, 360));
-      if (!isBuilding) return;
-
-      // SNAP CHUNK 1
-      chunkHeader.classList.remove('chunk-hidden');
-      chunkHeader.classList.add('chunk-placed');
-      document.getElementById('targetHeader').classList.add('placed');
-      spawnDustPuff(z1X, z1Y + 30);
-      playMinecraftSound('place');
-
-      await new Promise(r => setTimeout(r, 450));
-      if (!isBuilding) return;
-
-      // 2. ENDERMAN TELEPORT -> ZONE 2 (Xbox Broadcaster)
-      enderman.classList.remove('visible');
-      spawnTeleportParticles(z1X, z1Y);
-
-      const targetXboxRect = document.getElementById('targetXbox').getBoundingClientRect();
-      const z2X = (targetXboxRect.left - parentRect.left) + (targetXboxRect.width / 2);
-      const z2Y = (targetXboxRect.top - parentRect.top) + 30;
-
-      await new Promise(r => setTimeout(r, 120));
-      if (!isBuilding) return;
-      spawnTeleportParticles(z2X, z2Y);
-      playMinecraftSound('teleport');
-
-      enderman.style.left = z2X + 'px';
-      enderman.style.top = z2Y + 'px';
-      enderman.classList.add('visible');
-
-      await new Promise(r => setTimeout(r, 350));
-      if (!isBuilding) return;
-
-      // SNAP CHUNK 2
-      chunkXbox.classList.remove('chunk-hidden');
-      chunkXbox.classList.add('chunk-placed');
-      document.getElementById('targetXbox').classList.add('placed');
-      spawnDustPuff(z2X, z2Y + 40);
-      playMinecraftSound('place');
-
-      await new Promise(r => setTimeout(r, 450));
-      if (!isBuilding) return;
-
-      // 3. ENDERMAN TELEPORT -> ZONE 3 (Server List)
-      enderman.classList.remove('visible');
-      spawnTeleportParticles(z2X, z2Y);
-
-      const targetServersRect = document.getElementById('targetServers').getBoundingClientRect();
-      const z3X = (targetServersRect.left - parentRect.left) + (targetServersRect.width / 2);
-      const z3Y = (targetServersRect.top - parentRect.top) + 40;
-
-      await new Promise(r => setTimeout(r, 120));
-      if (!isBuilding) return;
-      spawnTeleportParticles(z3X, z3Y);
-      playMinecraftSound('teleport');
-
-      enderman.style.left = z3X + 'px';
-      enderman.style.top = z3Y + 'px';
-      enderman.classList.add('visible');
-
-      await new Promise(r => setTimeout(r, 350));
-      if (!isBuilding) return;
-
-      // SNAP CHUNK 3
-      chunkServers.classList.remove('chunk-hidden');
-      chunkServers.classList.add('chunk-placed');
-      document.getElementById('targetServers').classList.add('placed');
-      spawnDustPuff(z3X, z3Y + 50);
-      playMinecraftSound('place');
-
-      await new Promise(r => setTimeout(r, 420));
-      if (!isBuilding) return;
-
-      // 4. FINISH: Enderman teleports away with purple flourish
-      spawnTeleportParticles(z3X, z3Y);
-      playMinecraftSound('teleport');
-      enderman.classList.remove('visible');
-      grid.classList.remove('visible');
-      playMinecraftSound('complete');
-
-      await new Promise(r => setTimeout(r, 300));
-      skipBuildAnimation();
-    }
-
-    // Keyboard ESC to skip
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isBuilding) {
-        skipBuildAnimation();
-      }
-    });
-
-    // Auto-align targets on window resize
-    window.addEventListener('resize', () => {
-      if (isBuilding) {
-        alignTarget('targetHeader', document.getElementById('chunkHeader'));
-        alignTarget('targetXbox', document.getElementById('chunkXbox'));
-        alignTarget('targetServers', document.getElementById('chunkServers'));
-      }
-    });
-
-    // =========================================================
-    // REGULAR APP LOGIC
-    // =========================================================
     function showToast(message, type = 'info') {
       const toast = document.getElementById('toast');
       const icon = type === 'success' ? '🏆' : (type === 'danger' ? '⚠️' : 'ℹ️');
@@ -2171,6 +1706,7 @@
             banner.style.display = 'none';
           }
 
+          // Gamertag & Join Links
           if (data.gamertag) {
             gamertagEl.textContent = data.gamertag;
             profileBtn.href = data.joinLinks?.xboxProfileUrl || '#';
@@ -2618,13 +2154,6 @@
     checkXboxStatus();
     setInterval(checkProxyStatus, 10000);
     setInterval(checkXboxStatus, 15000);
-
-    // Run Enderman build intro on first visit in this session
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        playEndermanBuildAnimation(false);
-      }, 250);
-    });
   </script>
 </body>
 </html>
