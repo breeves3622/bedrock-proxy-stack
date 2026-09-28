@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bedrock Proxy Portal | Minecraft Server Manager</title>
   
-  <!-- Minecraft Pixel Fonts + Clean Modern Typography -->
+  <!-- Clean Modern Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -28,8 +28,7 @@
       --mc-gold-glow: rgba(245, 158, 11, 0.35);
       --mc-lapis: #3b82f6;
       --mc-text: #f1f5f9;
-      --mc-text-muted: #8899ac;
-      --font-pixel: 'Silkscreen', cursive, monospace;
+      --mc-text-muted: #94a3b8;
       --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
@@ -43,6 +42,7 @@
       min-height: 100vh;
       padding-bottom: 40px;
       position: relative;
+      overflow-x: hidden;
     }
 
     /* Top decorative Grass Block accent bar */
@@ -53,10 +53,50 @@
       box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
     }
 
+    /* Floating XP Ambient Orbs in Background */
+    .mc-orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatOrb 5s infinite ease-in-out;
+      z-index: 0;
+    }
+    .mc-orb-1 {
+      width: 7px; height: 7px;
+      background: #a3e635;
+      box-shadow: 0 0 10px #a3e635;
+      top: 40px; left: 15%;
+      animation-duration: 4.8s;
+    }
+    .mc-orb-2 {
+      width: 9px; height: 9px;
+      background: #4ade80;
+      box-shadow: 0 0 12px #4ade80;
+      top: 70px; right: 20%;
+      animation-duration: 4.2s;
+      animation-delay: 1.5s;
+    }
+    .mc-orb-3 {
+      width: 6px; height: 6px;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+      top: 25px; right: 35%;
+      animation-duration: 5.5s;
+      animation-delay: 2.5s;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translateY(0) scale(0.9); opacity: 0.15; }
+      50% { transform: translateY(-20px) scale(1.15); opacity: 0.75; }
+      100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
+    }
+
     .container {
       max-width: 920px;
       margin: 0 auto;
       padding: 24px 16px;
+      position: relative;
+      z-index: 1;
     }
 
     /* Header */
@@ -67,41 +107,69 @@
       margin-bottom: 24px;
       flex-wrap: wrap;
       gap: 16px;
-      padding-bottom: 16px;
+      padding-bottom: 18px;
       border-bottom: 2px solid var(--mc-border);
+      position: relative;
     }
 
     .title-group {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
     }
 
-    .title-icon {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
-      border: 2px solid var(--mc-diamond);
-      border-radius: 6px;
+    /* Floating 3D Grass Block Icon */
+    .mc-floating-block-wrap {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
-      box-shadow: 0 0 14px var(--mc-diamond-glow);
+      width: 48px;
+      height: 48px;
+      user-select: none;
+    }
+
+    .mc-block-svg {
+      animation: mcFloat 3.2s ease-in-out infinite;
+      display: block;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+    }
+
+    .mc-block-shadow {
+      width: 28px;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 50%;
+      margin-top: 1px;
+      filter: blur(2px);
+      animation: shadowPulse 3.2s ease-in-out infinite;
+    }
+
+    @keyframes mcFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
+    }
+
+    @keyframes shadowPulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(0.75); opacity: 0.25; }
     }
 
     .title-group h1 {
-      font-family: var(--font-pixel);
-      font-size: 1.4rem;
-      letter-spacing: 0.5px;
+      font-size: 1.55rem;
+      font-weight: 800;
       color: #fff;
-      text-shadow: 2px 2px 0 #000;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .subtitle {
       color: var(--mc-text-muted);
-      font-size: 0.88rem;
-      margin-top: 3px;
+      font-size: 0.9rem;
+      margin-top: 4px;
+      font-weight: 400;
     }
 
     /* Cards */
@@ -110,16 +178,17 @@
       border: 2px solid var(--mc-border);
       border-top-color: var(--mc-border-light);
       border-left-color: var(--mc-border-light);
-      border-radius: 8px;
-      padding: 20px;
+      border-radius: 10px;
+      padding: 22px;
       margin-bottom: 20px;
       box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), 0 8px 24px rgba(0, 0, 0, 0.45);
       position: relative;
+      transition: transform 0.15s ease, border-color 0.15s ease;
     }
 
     .card-emerald-glow {
       border-left: 4px solid var(--mc-emerald);
-      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), -4px 0 16px var(--mc-emerald-glow), 0 8px 24px rgba(0, 0, 0, 0.45);
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), -4px 0 18px var(--mc-emerald-glow), 0 8px 24px rgba(0, 0, 0, 0.45);
     }
 
     /* Status Bar */
@@ -128,51 +197,60 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 14px;
     }
 
     .card-title {
-      font-family: var(--font-pixel);
-      font-size: 1.05rem;
-      letter-spacing: 0.5px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       color: #fff;
-      text-shadow: 1px 1px 0 #000;
     }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-family: var(--font-pixel);
-      font-size: 0.76rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
       padding: 5px 12px;
-      border-radius: 4px;
+      border-radius: 6px;
       background: #090e13;
       border: 1px solid var(--mc-border);
       box-shadow: inset 1px 1px 0 rgba(0,0,0,0.6);
+      text-transform: uppercase;
     }
 
     .status-dot {
       width: 9px;
       height: 9px;
-      border-radius: 2px;
+      border-radius: 50%;
       background: var(--mc-text-muted);
+      position: relative;
     }
     .status-dot.online {
       background: var(--mc-emerald);
-      box-shadow: 0 0 8px var(--mc-emerald);
+      box-shadow: 0 0 10px var(--mc-emerald);
+      animation: mcPulse 2s infinite ease-out;
     }
     .status-dot.stopped {
       background: var(--mc-redstone);
-      box-shadow: 0 0 8px var(--mc-redstone);
+      box-shadow: 0 0 10px var(--mc-redstone);
     }
     .status-dot.restarting {
       background: var(--mc-gold);
-      box-shadow: 0 0 8px var(--mc-gold);
+      box-shadow: 0 0 10px var(--mc-gold);
       animation: pulse-glow 1.2s infinite ease-in-out;
+    }
+
+    @keyframes mcPulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
     @keyframes pulse-glow {
@@ -180,24 +258,26 @@
       50% { opacity: 0.5; transform: scale(0.9); }
     }
 
-    /* Minecraft Styled 3D Beveled Buttons */
+    /* Tactile 3D Buttons with Clean Fonts */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 7px;
-      padding: 8px 16px;
-      border-radius: 4px;
+      padding: 9px 16px;
+      border-radius: 6px;
       border: 2px solid;
-      font-family: var(--font-pixel);
-      font-size: 0.8rem;
-      letter-spacing: 0.5px;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
       cursor: pointer;
-      transition: all 0.1s ease;
+      transition: all 0.15s ease;
       text-decoration: none;
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
       user-select: none;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+      position: relative;
+      overflow: hidden;
     }
 
     .btn:active {
@@ -209,6 +289,30 @@
       opacity: 0.5;
       cursor: not-allowed;
       filter: grayscale(0.8);
+    }
+
+    /* Enchantment Glint on Hover for Primary & Emerald Buttons */
+    .btn-primary:hover::after, .btn-emerald:hover::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -120%;
+      width: 70%;
+      height: 200%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.2) 40%,
+        rgba(216, 180, 254, 0.4) 65%,
+        transparent 100%
+      );
+      transform: skewX(-25deg);
+      animation: glintSweep 0.85s ease-in-out;
+    }
+
+    @keyframes glintSweep {
+      0% { left: -120%; }
+      100% { left: 160%; }
     }
 
     /* Stone / Secondary Button */
@@ -236,7 +340,7 @@
     }
     .btn-primary:hover {
       background: linear-gradient(180deg, #7dd3fc 0%, #0ea5e9 100%);
-      box-shadow: 0 0 14px var(--mc-diamond-glow);
+      box-shadow: 0 0 16px var(--mc-diamond-glow);
     }
 
     /* Emerald Button */
@@ -250,7 +354,7 @@
     }
     .btn-emerald:hover {
       background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
-      box-shadow: 0 0 14px var(--mc-emerald-glow);
+      box-shadow: 0 0 16px var(--mc-emerald-glow);
     }
 
     /* Redstone / Danger Button */
@@ -264,12 +368,109 @@
     }
     .btn-danger:hover {
       background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
-      box-shadow: 0 0 14px var(--mc-redstone-glow);
+      box-shadow: 0 0 16px var(--mc-redstone-glow);
     }
 
     .btn-sm {
-      padding: 5px 11px;
-      font-size: 0.72rem;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    /* Animated Minecraft SVG Icons */
+    .mc-icon {
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    /* Pickaxe Swing on Primary Button Hover */
+    .btn-primary:hover .mc-pickaxe {
+      animation: pickaxeSwing 0.45s ease-in-out;
+    }
+    @keyframes pickaxeSwing {
+      0% { transform: rotate(0deg); }
+      35% { transform: rotate(-25deg); }
+      70% { transform: rotate(18deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    /* Chest Bounce on Card Hover */
+    .card:hover .mc-chest {
+      animation: chestBounce 0.5s ease;
+    }
+    @keyframes chestBounce {
+      0%, 100% { transform: translateY(0); }
+      35% { transform: translateY(-4px) scale(1.05); }
+      65% { transform: translateY(1px); }
+    }
+
+    /* Redstone Torch Flicker & Pulse */
+    @keyframes torchFlicker {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8)); }
+      50% { opacity: 0.8; filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.4)); }
+      75% { opacity: 0.95; filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.95)); }
+    }
+    .torch-head {
+      animation: torchFlicker 1.8s infinite ease-in-out;
+    }
+
+    /* Eye of Ender Hypnotic Pulse */
+    @keyframes enderGaze {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 3px rgba(45, 212, 191, 0.7)); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 7px rgba(45, 212, 191, 0.95)); }
+    }
+    .mc-ender-eye {
+      animation: enderGaze 2.6s infinite ease-in-out;
+    }
+
+    /* Experience (XP) Bar Component */
+    .mc-xp-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      margin: 10px 0 4px 0;
+    }
+    .mc-xp-bar {
+      width: 100%;
+      height: 8px;
+      background: #090e13;
+      border: 1px solid #1f2937;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+    }
+    .mc-xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #16a34a 0%, #4ade80 50%, #86efac 100%);
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+      transition: width 0.4s ease;
+    }
+    .mc-xp-notches {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 4px;
+      pointer-events: none;
+    }
+    .mc-xp-notches span {
+      width: 1px;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+    }
+    .mc-xp-level {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #a3e635;
+      text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 6px rgba(163, 230, 53, 0.7);
+      margin-top: -2px;
+      z-index: 2;
+      user-select: none;
     }
 
     /* Server List Section */
@@ -277,24 +478,27 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .server-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 16px;
+      padding: 14px 18px;
       background: var(--mc-card-inner);
       border: 1px solid var(--mc-border);
-      border-radius: 6px;
-      margin-bottom: 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
       gap: 12px;
-      transition: border-color 0.15s ease, background 0.15s ease;
+      transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
     }
     .server-item:hover {
       border-color: var(--mc-diamond);
       background: #0f1620;
+      transform: translateX(2px);
     }
 
     .server-info {
@@ -302,25 +506,27 @@
     }
 
     .server-name {
-      font-family: var(--font-pixel);
-      font-size: 0.95rem;
-      letter-spacing: 0.5px;
+      font-size: 1.05rem;
+      font-weight: 700;
       color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .server-address {
       color: var(--mc-text-muted);
-      font-size: 0.84rem;
+      font-size: 0.85rem;
       font-family: var(--font-mono);
-      margin-top: 4px;
+      margin-top: 5px;
       display: inline-block;
-      background: rgba(0,0,0,0.3);
-      padding: 2px 7px;
-      border-radius: 3px;
+      background: rgba(0,0,0,0.35);
+      padding: 3px 8px;
+      border-radius: 4px;
       border: 1px solid rgba(255,255,255,0.06);
     }
 
-    /* Minecraft Signal Bars for Ping */
+    /* Signal Bars for Latency */
     .ping-indicator {
       display: inline-flex;
       align-items: center;
@@ -329,8 +535,8 @@
       font-size: 0.84rem;
       margin-right: 12px;
       background: #090e13;
-      padding: 4px 9px;
-      border-radius: 4px;
+      padding: 5px 10px;
+      border-radius: 5px;
       border: 1px solid var(--mc-border);
     }
 
@@ -366,8 +572,7 @@
       text-align: center;
       padding: 40px;
       color: var(--mc-text-muted);
-      font-family: var(--font-pixel);
-      font-size: 0.88rem;
+      font-size: 0.95rem;
     }
 
     /* Xbox Auth Banner */
@@ -375,24 +580,24 @@
       margin-top: 16px;
       background: rgba(245, 158, 11, 0.12);
       border: 2px solid var(--mc-gold);
-      border-radius: 6px;
-      padding: 16px;
-      box-shadow: 0 0 16px var(--mc-gold-glow);
+      border-radius: 8px;
+      padding: 16px 20px;
+      box-shadow: 0 0 18px var(--mc-gold-glow);
     }
 
     .code-display {
-      font-family: var(--font-pixel);
-      font-size: 1.25rem;
-      font-weight: bold;
+      font-family: var(--font-mono);
+      font-size: 1.3rem;
+      font-weight: 700;
       background: #000;
-      padding: 4px 12px;
-      border-radius: 4px;
+      padding: 5px 14px;
+      border-radius: 6px;
       color: var(--mc-diamond);
-      letter-spacing: 2px;
+      letter-spacing: 2.5px;
       border: 1px solid var(--mc-border);
-      text-shadow: 0 0 8px var(--mc-diamond-glow);
+      text-shadow: 0 0 10px var(--mc-diamond-glow);
       display: inline-block;
-      margin-left: 6px;
+      margin-left: 8px;
     }
 
     /* Modal */
@@ -414,7 +619,7 @@
       border: 3px solid var(--mc-border);
       border-top-color: var(--mc-border-light);
       border-left-color: var(--mc-border-light);
-      border-radius: 8px;
+      border-radius: 10px;
       width: 100%;
       max-width: 500px;
       padding: 24px;
@@ -422,18 +627,20 @@
     }
 
     .modal-title {
-      font-family: var(--font-pixel);
-      font-size: 1.15rem;
+      font-size: 1.25rem;
+      font-weight: 700;
       margin-bottom: 18px;
-      letter-spacing: 0.5px;
+      letter-spacing: -0.01em;
       color: #fff;
-      text-shadow: 1px 1px 0 #000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .form-group { margin-bottom: 16px; }
     .form-group label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       margin-bottom: 6px;
       color: var(--mc-text-muted);
       font-weight: 500;
@@ -443,7 +650,7 @@
       padding: 11px 13px;
       background: #080c10;
       border: 2px solid var(--mc-border);
-      border-radius: 4px;
+      border-radius: 6px;
       color: #fff;
       font-size: 0.95rem;
       font-family: var(--font-mono);
@@ -479,18 +686,18 @@
       line-height: 1.45;
     }
 
-    /* Minecraft Toast Notification */
+    /* Advancement / Toast Notification */
     .toast {
       position: fixed;
       bottom: 24px;
       right: 24px;
       padding: 14px 20px;
-      border-radius: 6px;
+      border-radius: 8px;
       background: #111822;
       border: 2px solid var(--mc-border);
       color: #fff;
-      font-family: var(--font-pixel);
-      font-size: 0.82rem;
+      font-size: 0.9rem;
+      font-weight: 600;
       z-index: 200;
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       opacity: 0;
@@ -499,7 +706,7 @@
       pointer-events: none;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .toast.show {
       opacity: 1;
@@ -507,11 +714,11 @@
     }
     .toast.success {
       border-color: var(--mc-emerald);
-      box-shadow: 0 0 16px var(--mc-emerald-glow);
+      box-shadow: 0 0 18px var(--mc-emerald-glow);
     }
     .toast.danger {
       border-color: var(--mc-redstone);
-      box-shadow: 0 0 16px var(--mc-redstone-glow);
+      box-shadow: 0 0 18px var(--mc-redstone-glow);
     }
   </style>
 </head>
@@ -519,18 +726,54 @@
   <!-- Decorative top grass block accent -->
   <div class="top-grass-bar"></div>
 
+  <!-- Ambient Floating XP Particles -->
+  <div class="mc-orb mc-orb-1"></div>
+  <div class="mc-orb mc-orb-2"></div>
+  <div class="mc-orb mc-orb-3"></div>
+
   <div class="container">
     <!-- Header -->
     <header>
       <div class="title-group">
-        <div class="title-icon">⛏️</div>
+        <!-- Handcrafted Animated Floating 3D Grass Block -->
+        <div class="mc-floating-block-wrap" title="Minecraft Bedrock Proxy Stack">
+          <svg class="mc-block-svg" viewBox="0 0 32 32" width="42" height="42">
+            <g>
+              <!-- Isometric Grass Block Top -->
+              <polygon points="16,2 30,9 16,16 2,9" fill="#5b8e32"/>
+              <polygon points="16,2 23,5.5 16,9 9,5.5" fill="#76b33f"/>
+              <polygon points="12,5 18,8 15,9.5 9,6.5" fill="#477026"/>
+              <!-- Left Dirt Face -->
+              <polygon points="2,9 16,16 16,30 2,23" fill="#866043"/>
+              <polygon points="2,9 16,16 16,20 2,13" fill="#5b8e32"/>
+              <polygon points="4,11 7,12.5 7,15 4,13.5" fill="#477026"/>
+              <polygon points="10,14 13,15.5 13,18 10,16.5" fill="#5b8e32"/>
+              <polygon points="4,17 7,18.5 7,21 4,19.5" fill="#5c3f29"/>
+              <polygon points="10,20 13,21.5 13,24 10,22.5" fill="#5c3f29"/>
+              <!-- Right Shaded Dirt Face -->
+              <polygon points="16,16 30,9 30,23 16,30" fill="#684931"/>
+              <polygon points="16,16 30,9 30,13 16,20" fill="#446b24"/>
+              <polygon points="18,17 21,15.5 21,18 18,19.5" fill="#33521b"/>
+              <polygon points="24,14 27,12.5 27,15 24,16.5" fill="#446b24"/>
+              <polygon points="18,22 21,20.5 21,23 18,24.5" fill="#47301f"/>
+              <polygon points="24,19 27,17.5 27,20 24,21.5" fill="#47301f"/>
+            </g>
+          </svg>
+          <div class="mc-block-shadow"></div>
+        </div>
+
         <div>
           <h1>Bedrock Proxy Portal</h1>
           <div class="subtitle">Custom Server Menu & Xbox Live Friend Gateway</div>
         </div>
       </div>
       <div>
-        <button class="btn btn-secondary" onclick="openLogsModal()">📜 Proxy Logs</button>
+        <button class="btn btn-secondary" onclick="openLogsModal()">
+          <svg class="mc-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+          Proxy Logs
+        </button>
       </div>
     </header>
 
@@ -542,7 +785,7 @@
             <span class="status-dot" id="proxyDot"></span>
             <span id="proxyStatusText">CHECKING PROXY...</span>
           </div>
-          <span id="proxyDetails" style="font-size: 0.85rem; color: var(--mc-text-muted); font-family: var(--font-mono);"></span>
+          <span id="proxyDetails" style="font-size: 0.88rem; color: var(--mc-text-muted); font-family: var(--font-mono);"></span>
         </div>
         <div style="display:flex; gap: 8px;">
           <button class="btn btn-secondary btn-sm" onclick="checkProxyStatus()">🔄 Refresh</button>
@@ -556,8 +799,16 @@
       <div class="status-bar">
         <div>
           <div style="display:flex; align-items:center; gap: 10px;">
-            <div class="card-title">🎮 Xbox Live Friend Broadcaster</div>
-            <div class="status-badge" style="padding: 3px 9px;">
+            <!-- Eye of Ender Icon -->
+            <svg class="mc-icon mc-ender-eye" viewBox="0 0 24 24" width="22" height="22">
+              <circle cx="12" cy="12" r="10" fill="#043933" stroke="#0f766e" stroke-width="1.5"/>
+              <circle cx="12" cy="12" r="7" fill="#0d9488"/>
+              <circle cx="12" cy="12" r="4.5" fill="#2dd4bf"/>
+              <ellipse cx="12" cy="12" rx="2" ry="4" fill="#042f2e"/>
+              <circle cx="11" cy="10" r="1.2" fill="#ccfbf1"/>
+            </svg>
+            <div class="card-title">Xbox Live Friend Broadcaster</div>
+            <div class="status-badge" style="padding: 4px 10px;">
               <span class="status-dot" id="xboxDot"></span>
               <span id="xboxStatusText">CHECKING...</span>
             </div>
@@ -578,8 +829,15 @@
       <div id="xboxAuthBanner" class="xbox-auth-box" style="display:none;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
           <div>
-            <strong style="color: var(--mc-gold); font-family: var(--font-pixel); font-size: 0.95rem; letter-spacing: 0.5px;">🔑 Microsoft Account Link Required!</strong>
-            <div style="font-size: 0.9rem; margin-top: 8px; color: var(--mc-text);">
+            <strong style="color: var(--mc-gold); font-size: 1rem; display:flex; align-items:center; gap:8px;">
+              <svg class="mc-icon mc-redstone-torch" viewBox="0 0 24 24" width="20" height="20">
+                <rect x="10.5" y="10" width="3" height="11" fill="#78350f"/>
+                <rect class="torch-head" x="9.5" y="4" width="5" height="6" rx="1" fill="#ef4444"/>
+                <rect x="10.5" y="5" width="3" height="3" fill="#fca5a5"/>
+              </svg>
+              Microsoft Account Link Required!
+            </strong>
+            <div style="font-size: 0.92rem; margin-top: 8px; color: var(--mc-text);">
               1. Open <a id="xboxAuthUrlLink" href="https://www.microsoft.com/link" target="_blank" style="color: var(--mc-diamond); text-decoration: underline; font-weight:600;">https://www.microsoft.com/link</a><br>
               2. Enter code:
               <span id="xboxAuthCodeDisplay" class="code-display"></span>
@@ -593,15 +851,21 @@
       </div>
 
       <!-- Join Links & Share Section (Shown when active) -->
-      <div id="xboxJoinSection" style="margin-top: 16px; padding: 14px; background: var(--mc-card-inner); border: 1px solid var(--mc-border); border-radius: 6px;">
+      <div id="xboxJoinSection" style="margin-top: 16px; padding: 14px 18px; background: var(--mc-card-inner); border: 1px solid var(--mc-border); border-radius: 8px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div>
             <div style="display:flex; align-items:center; gap: 8px;">
-              <span style="font-size:0.85rem; color:var(--mc-text-muted);">Bot Gamertag:</span>
-              <strong id="xboxGamertagDisplay" style="color:var(--mc-diamond); font-family:var(--font-pixel); font-size: 1.05rem;">Not set</strong>
-              <span id="xboxAdvertisedIp" style="font-size:0.8rem; color:var(--mc-text-muted); font-family:var(--font-mono); margin-left: 6px;"></span>
+              <!-- Redstone Torch Status Indicator -->
+              <svg class="mc-icon mc-redstone-torch" viewBox="0 0 24 24" width="18" height="18" title="Active Redstone Signal">
+                <rect x="10.5" y="10" width="3" height="11" fill="#78350f"/>
+                <rect class="torch-head" x="9.5" y="4" width="5" height="6" rx="1" fill="#ef4444"/>
+                <rect x="10.5" y="5" width="3" height="3" fill="#fca5a5"/>
+              </svg>
+              <span style="font-size:0.88rem; color:var(--mc-text-muted);">Bot Gamertag:</span>
+              <strong id="xboxGamertagDisplay" style="color:var(--mc-diamond); font-size: 1.05rem;">Not set</strong>
+              <span id="xboxAdvertisedIp" style="font-size:0.84rem; color:var(--mc-text-muted); font-family:var(--font-mono); margin-left: 6px;"></span>
             </div>
-            <div style="font-size: 0.82rem; color: var(--mc-text-muted); margin-top: 4px;">
+            <div style="font-size: 0.85rem; color: var(--mc-text-muted); margin-top: 4px;">
               Share this gamertag with friends. Once added on Xbox, your proxy appears directly under their Minecraft <strong>Friends</strong> tab!
             </div>
           </div>
@@ -618,12 +882,55 @@
     <div class="card">
       <div class="server-list-header">
         <div>
-          <div class="card-title">💎 Available Servers</div>
+          <div class="card-title">
+            <!-- Minecraft Chest Icon -->
+            <svg class="mc-icon mc-chest" viewBox="0 0 24 24" width="22" height="22">
+              <rect x="3" y="5" width="18" height="15" rx="1.5" fill="#92400e" stroke="#451a03" stroke-width="1.5"/>
+              <line x1="3" y1="10" x2="21" y2="10" stroke="#451a03" stroke-width="1.5"/>
+              <line x1="4.5" y1="6.5" x2="19.5" y2="6.5" stroke="#b45309" stroke-width="1"/>
+              <rect class="chest-latch" x="10.5" y="8.5" width="3" height="4" rx="0.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="0.8"/>
+            </svg>
+            Available Servers
+          </div>
           <div class="subtitle">These servers are displayed inside the in-game Bedrock menu</div>
         </div>
         <div style="display:flex; gap: 8px;">
-          <button class="btn btn-secondary btn-sm" onclick="pingAllServers()">📡 Ping All</button>
-          <button class="btn btn-primary btn-sm" onclick="openAddModal()">➕ Add Server</button>
+          <button class="btn btn-secondary btn-sm" onclick="pingAllServers()">
+            <!-- Emerald Icon -->
+            <svg class="mc-icon mc-emerald-gem" viewBox="0 0 24 24" width="16" height="16">
+              <polygon points="12,2 19,6 19,18 12,22 5,18 5,6" fill="#10b981" stroke="#047857" stroke-width="1.2"/>
+              <polygon points="12,5 16,8 16,16 12,19 8,16 8,8" fill="#34d399"/>
+              <polygon points="12,5 14,7 12,9 10,7" fill="#a7f3d0"/>
+            </svg>
+            Ping All
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+            <!-- Diamond Pickaxe Icon -->
+            <svg class="mc-icon mc-pickaxe" viewBox="0 0 24 24" width="18" height="18">
+              <g>
+                <line x1="5" y1="19" x2="15" y2="9" stroke="#78350f" stroke-width="2.5"/>
+                <line x1="5.5" y1="18.5" x2="14.5" y2="9.5" stroke="#92400e" stroke-width="1"/>
+                <path d="M12 4 Q17 5 20 12 L18 14 Q15 9 10 7 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+                <circle cx="16" cy="8" r="1" fill="#bae6fd"/>
+              </g>
+            </svg>
+            Add Server
+          </button>
+        </div>
+      </div>
+
+      <!-- Minecraft Experience (XP) Bar Counter -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+        <span style="font-size: 0.85rem; color: var(--mc-text-muted);">Configured Realms & Proxies:</span>
+        <div class="mc-xp-container">
+          <div class="mc-xp-bar">
+            <div class="mc-xp-fill" id="xpFillBar" style="width: 100%;"></div>
+            <div class="mc-xp-notches">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="mc-xp-level" id="xpLevelNumber" title="Total Servers Available">0</div>
         </div>
       </div>
 
@@ -632,7 +939,7 @@
       </div>
 
       <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--mc-border); padding-top: 16px;">
-        <span style="font-size: 0.85rem; color: var(--mc-gold); font-family: var(--font-pixel);" id="unsavedNotice"></span>
+        <span style="font-size: 0.88rem; font-weight:600; color: var(--mc-gold);" id="unsavedNotice"></span>
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-secondary" id="btnSaveOnly" onclick="saveServers(false)">💾 Save Changes</button>
           <button class="btn btn-emerald" id="btnSaveRestart" onclick="saveServers(true)">🚀 Save & Restart Proxy</button>
@@ -644,9 +951,17 @@
   <!-- Add / Edit Server Modal -->
   <div class="modal-backdrop" id="serverModal">
     <div class="modal">
-      <h3 class="modal-title" id="modalTitle">Add Minecraft Server</h3>
+      <h3 class="modal-title" id="modalTitle">
+        <svg class="mc-icon mc-pickaxe" viewBox="0 0 24 24" width="20" height="20">
+          <g>
+            <line x1="5" y1="19" x2="15" y2="9" stroke="#78350f" stroke-width="2.5"/>
+            <path d="M12 4 Q17 5 20 12 L18 14 Q15 9 10 7 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+          </g>
+        </svg>
+        Add Minecraft Server
+      </h3>
       <div class="form-group">
-        <label>Server Display Name (Supports § color codes)</label>
+        <label>Server Display Name (Supports § Bedrock color codes)</label>
         <input type="text" class="form-control" id="modalServerName" placeholder="e.g. §bSurvival §aSMP">
       </div>
       <div class="form-group">
@@ -671,11 +986,18 @@
   <!-- Xbox Broadcaster Setup & Settings Modal -->
   <div class="modal-backdrop" id="xboxSettingsModal">
     <div class="modal">
-      <h3 class="modal-title">⚙️ Xbox Broadcaster Setup</h3>
+      <h3 class="modal-title">
+        <svg class="mc-icon mc-ender-eye" viewBox="0 0 24 24" width="20" height="20">
+          <circle cx="12" cy="12" r="10" fill="#043933"/>
+          <circle cx="12" cy="12" r="6" fill="#0d9488"/>
+          <ellipse cx="12" cy="12" rx="2" ry="4" fill="#042f2e"/>
+        </svg>
+        Xbox Broadcaster Setup
+      </h3>
       <div class="form-group">
         <label>Advertised IP or Domain (Where friends connect)</label>
         <input type="text" class="form-control" id="xboxSettingIp" placeholder="e.g. 10.80.1.55 (LAN) or play.mydomain.com (Internet)">
-        <span style="font-size:0.78rem; color:var(--mc-text-muted); margin-top:3px; display:block;">Use your local IP for home LAN, or your Public IP / DDNS for internet friends.</span>
+        <span style="font-size:0.8rem; color:var(--mc-text-muted); margin-top:3px; display:block;">Use your local IP for home LAN, or your Public IP / DDNS for internet friends.</span>
       </div>
       <div class="form-group">
         <label>Advertised Bedrock Port (Default 19132)</label>
@@ -684,7 +1006,7 @@
       <div class="form-group">
         <label>Bot Xbox Gamertag (Account used to broadcast)</label>
         <input type="text" class="form-control" id="xboxSettingGamertag" placeholder="e.g. MorbidServer">
-        <span style="font-size:0.78rem; color:var(--mc-text-muted); margin-top:3px; display:block;">Used to generate direct Xbox Add-Friend links for players.</span>
+        <span style="font-size:0.8rem; color:var(--mc-text-muted); margin-top:3px; display:block;">Used to generate direct Xbox Add-Friend links for players.</span>
       </div>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeXboxSettingsModal()">Cancel</button>
@@ -999,6 +1321,9 @@
 
     function renderServerList() {
       const container = document.getElementById('serverListContainer');
+      const levelEl = document.getElementById('xpLevelNumber');
+      if (levelEl) levelEl.textContent = servers.length;
+
       if (servers.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
@@ -1080,24 +1405,30 @@
                 <span class="ping-bar"></span>
                 <span class="ping-bar"></span>
               </div>
-              <span style="color:var(--mc-${barClass === 'green' ? 'emerald' : (barClass === 'yellow' ? 'gold' : 'redstone')}); font-weight:600;">${res.latency}ms</span>
+              <span style="color:var(--mc-${barClass === 'green' ? 'emerald' : (barClass === 'yellow' ? 'gold' : 'redstone')}); font-weight:700;">${res.latency}ms</span>
               ${res.players !== undefined ? `<span style="color:var(--mc-text-muted); font-size:0.78rem;">(${res.players}/${res.maxPlayers})</span>` : ''}
             `;
           } else {
             pingEl.innerHTML = `
               <div class="ping-bars red"><span class="ping-bar"></span></div>
-              <span style="color:var(--mc-redstone)">Offline</span>
+              <span style="color:var(--mc-redstone); font-weight:600;">Offline</span>
             `;
           }
         } catch (e) {
-          pingEl.innerHTML = `<span style="color:var(--mc-redstone)">Unreachable</span>`;
+          pingEl.innerHTML = `<span style="color:var(--mc-redstone); font-weight:600;">Unreachable</span>`;
         }
       });
     }
 
     function openAddModal() {
       editingIndex = -1;
-      document.getElementById('modalTitle').textContent = 'Add Minecraft Server';
+      document.getElementById('modalTitle').innerHTML = `
+        <svg class="mc-icon mc-pickaxe" viewBox="0 0 24 24" width="20" height="20">
+          <g>
+            <line x1="5" y1="19" x2="15" y2="9" stroke="#78350f" stroke-width="2.5"/>
+            <path d="M12 4 Q17 5 20 12 L18 14 Q15 9 10 7 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+          </g>
+        </svg> Add Minecraft Server`;
       document.getElementById('modalServerName').value = '';
       document.getElementById('modalServerAddress').value = '';
       document.getElementById('modalServerPort').value = '19133';
@@ -1108,7 +1439,13 @@
     function openEditModal(index) {
       editingIndex = index;
       const s = servers[index];
-      document.getElementById('modalTitle').textContent = 'Edit Minecraft Server';
+      document.getElementById('modalTitle').innerHTML = `
+        <svg class="mc-icon mc-pickaxe" viewBox="0 0 24 24" width="20" height="20">
+          <g>
+            <line x1="5" y1="19" x2="15" y2="9" stroke="#78350f" stroke-width="2.5"/>
+            <path d="M12 4 Q17 5 20 12 L18 14 Q15 9 10 7 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+          </g>
+        </svg> Edit Minecraft Server`;
       document.getElementById('modalServerName').value = s.name;
       document.getElementById('modalServerAddress').value = s.address;
       document.getElementById('modalServerPort').value = s.port;
