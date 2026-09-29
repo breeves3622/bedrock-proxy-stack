@@ -1508,8 +1508,8 @@
         <input type="text" class="form-control" id="modalServerAddress" placeholder="e.g. 10.80.1.55 or mc.mydomain.com">
       </div>
       <div class="form-group">
-        <label>Target Bedrock Port (Default 19133+)</label>
-        <input type="number" class="form-control" id="modalServerPort" value="19133">
+        <label>Target Bedrock Port (Default 19132)</label>
+        <input type="number" class="form-control" id="modalServerPort" value="19132" placeholder="19132">
       </div>
       <div style="margin-bottom: 14px;">
         <button type="button" class="btn btn-secondary btn-sm" onclick="testModalServer()">📡 Test Connection</button>
@@ -1970,7 +1970,7 @@
         </svg> Add Minecraft Server`;
       document.getElementById('modalServerName').value = '';
       document.getElementById('modalServerAddress').value = '';
-      document.getElementById('modalServerPort').value = '19133';
+      document.getElementById('modalServerPort').value = '19132';
       document.getElementById('modalTestResult').textContent = '';
       document.getElementById('serverModal').classList.add('open');
     }
@@ -2028,7 +2028,8 @@
     function confirmSaveModal() {
       const name = document.getElementById('modalServerName').value.trim();
       const address = document.getElementById('modalServerAddress').value.trim();
-      const port = parseInt(document.getElementById('modalServerPort').value.trim(), 10);
+      const portInput = document.getElementById('modalServerPort').value.trim();
+      const port = parseInt(portInput || '19132', 10);
 
       if (!name || !address || isNaN(port)) {
         alert('Please fill in all fields with valid values.');
