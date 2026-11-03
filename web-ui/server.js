@@ -1,4 +1,5 @@
 const http = require('http')
+const https = require('https')
 const fs = require('fs')
 const path = require('path')
 const dgram = require('dgram')
@@ -12,7 +13,7 @@ const DOCKER_SOCKET = process.env.DOCKER_SOCKET || '/var/run/docker.sock'
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ''
 
 // Helper to make requests to Docker daemon over Unix socket
-function dockerRequest(endpoint, method = 'GET', postData = null) {
+function dockerRequest(endpoint, method = 'GET', postData = null, timeoutMs = 120000) {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(DOCKER_SOCKET)) {
       return resolve({
@@ -25,7 +26,8 @@ function dockerRequest(endpoint, method = 'GET', postData = null) {
       socketPath: DOCKER_SOCKET,
       path: endpoint,
       method: method,
-      headers: {}
+      headers: {},
+      timeout: timeoutMs
     }
 
     if (postData) {
@@ -39,7 +41,11 @@ function dockerRequest(endpoint, method = 'GET', postData = null) {
       res.on('end', () => {
         try {
           if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve({ statusCode: res.statusCode, body: data ? JSON.parse(data) : {} })
+            try {
+              resolve({ statusCode: res.statusCode, body: data ? JSON.parse(data) : {} })
+            } catch (err) {
+              resolve({ statusCode: res.statusCode, body: data })
+            }
           } else {
             resolve({ statusCode: res.statusCode, error: data || res.statusMessage })
           }
@@ -53,9 +59,258 @@ function dockerRequest(endpoint, method = 'GET', postData = null) {
       resolve({ error: err.message, available: false })
     })
 
+    req.on('timeout', () => {
+      req.destroy()
+      resolve({ error: `Docker request timed out after ${timeoutMs}ms`, available: false })
+    })
+
     if (postData) req.write(postData)
     req.end()
   })
+}
+
+// Fetch JSON from remote HTTPS URL (with User-Agent and redirect support)
+function fetchJson(url) {
+  return new Promise((resolve, reject) => {
+    try {
+      const u = new URL(url)
+      const options = {
+        hostname: u.hostname,
+        path: u.pathname + u.search,
+        headers: {
+          'User-Agent': 'Bedrock-Proxy-WebUI/1.0',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        timeout: 6000
+      }
+      const req = https.get(options, (res) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          return fetchJson(res.headers.location).then(resolve).catch(reject)
+        }
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          return reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`))
+        }
+        let data = ''
+        res.on('data', chunk => data += chunk)
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data))
+          } catch (e) {
+            reject(e)
+          }
+        })
+      })
+      req.on('error', reject)
+      req.on('timeout', () => {
+        req.destroy()
+        reject(new Error('Request timed out'))
+      })
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
+// Normalize version strings (handles 26.60 vs 1.26.60)
+function normalizeVersion(v) {
+  if (!v) return [0, 0, 0]
+  const cleaned = String(v).replace(/[^0-9.]/g, '')
+  const parts = cleaned.split('.').map(n => parseInt(n, 10) || 0)
+  if (parts.length === 2 && parts[0] >= 20) {
+    return [1, parts[0], parts[1]]
+  }
+  return parts
+}
+
+function compareVersions(v1, v2) {
+  const p1 = normalizeVersion(v1)
+  const p2 = normalizeVersion(v2)
+  for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+    const num1 = p1[i] || 0
+    const num2 = p2[i] || 0
+    if (num1 < num2) return -1
+    if (num1 > num2) return 1
+  }
+  return 0
+}
+
+// Cache for version status
+let versionCache = {
+  currentBedrockVersion: '',
+  currentProtocol: '',
+  latestBedrockVersion: '',
+  hasUpdate: false,
+  updateDetails: '',
+  lastChecked: null,
+  containers: {}
+}
+
+async function checkVersionStatus(forceRemote = false) {
+  let currentBedrock = ''
+  let currentProtocol = ''
+
+  try {
+    const logRes = await dockerRequest(`/containers/${XBOX_CONTAINER}/logs?stdout=1&stderr=1&tail=200`)
+    const logs = typeof logRes.body === 'string' ? logRes.body : ''
+    const match = logs.match(/for\s+Bedrock\s+([0-9.]+)(?:\s*\(([0-9]+)\))?/i)
+    if (match) {
+      currentBedrock = match[1]
+      currentProtocol = match[2] || ''
+    }
+  } catch (e) {}
+
+  versionCache.currentBedrockVersion = currentBedrock || versionCache.currentBedrockVersion || '1.26.50'
+  versionCache.currentProtocol = currentProtocol || versionCache.currentProtocol || '2193'
+
+  try {
+    const xboxInspect = await dockerRequest(`/containers/${XBOX_CONTAINER}/json`)
+    const proxyInspect = await dockerRequest(`/containers/${TARGET_CONTAINER}/json`)
+
+    versionCache.containers = {
+      [XBOX_CONTAINER]: {
+        running: xboxInspect.body?.State?.Running || false,
+        image: xboxInspect.body?.Config?.Image || 'ghcr.io/mcxboxbroadcast/standalone:latest',
+        created: xboxInspect.body?.Created
+      },
+      [TARGET_CONTAINER]: {
+        running: proxyInspect.body?.State?.Running || false,
+        image: proxyInspect.body?.Config?.Image || 'pugmatt/bedrock-connect:latest',
+        created: proxyInspect.body?.Created
+      }
+    }
+  } catch (e) {}
+
+  const now = Date.now()
+  const cacheAge = versionCache.lastChecked ? now - new Date(versionCache.lastChecked).getTime() : Infinity
+
+  if (forceRemote || cacheAge > 10 * 60 * 1000 || !versionCache.latestBedrockVersion) {
+    let latestFound = ''
+    let details = ''
+
+    try {
+      const releases = await fetchJson('https://api.github.com/repos/MCXboxBroadcast/Broadcaster/releases')
+      if (Array.isArray(releases) && releases.length > 0) {
+        for (const rel of releases) {
+          const text = `${rel.name || ''} ${rel.tag_name || ''} ${rel.body || ''}`
+          const m = text.match(/(?:Bedrock|Support|v)?\s*([12]\.[0-9]+(?:\.[0-9]+)?|[0-9]{2}\.[0-9]{2})/i)
+          if (m) {
+            latestFound = m[1]
+            details = rel.name || rel.tag_name
+            break
+          }
+        }
+      }
+    } catch (e) {
+      try {
+        const commits = await fetchJson('https://api.github.com/repos/MCXboxBroadcast/Broadcaster/commits?per_page=10')
+        if (Array.isArray(commits)) {
+          for (const c of commits) {
+            const msg = c.commit?.message || ''
+            const m = msg.match(/(?:Support|Bedrock|v)\s*([12]\.[0-9]+(?:\.[0-9]+)?|[0-9]{2}\.[0-9]{2})/i)
+            if (m) {
+              latestFound = m[1]
+              details = msg.split('\n')[0]
+              break
+            }
+          }
+        }
+      } catch (err2) {}
+    }
+
+    if (latestFound) {
+      versionCache.latestBedrockVersion = latestFound
+      versionCache.updateDetails = details || `Bedrock ${latestFound} available`
+    } else if (!versionCache.latestBedrockVersion) {
+      versionCache.latestBedrockVersion = '26.60'
+      versionCache.updateDetails = 'Bedrock 26.60 released'
+    }
+
+    versionCache.lastChecked = new Date().toISOString()
+  }
+
+  if (versionCache.latestBedrockVersion && versionCache.currentBedrockVersion) {
+    versionCache.hasUpdate = compareVersions(versionCache.currentBedrockVersion, versionCache.latestBedrockVersion) < 0
+  }
+
+  return versionCache
+}
+
+// Recreate a container with latest image
+async function updateAndRecreateContainer(containerName, defaultImage) {
+  const logs = []
+  const log = (msg) => {
+    console.log(`[Stack Update] ${msg}`)
+    logs.push(msg)
+  }
+
+  log(`Inspecting container ${containerName}...`)
+  const inspectRes = await dockerRequest(`/containers/${containerName}/json`)
+  if (inspectRes.error || !inspectRes.body?.Config) {
+    throw new Error(`Failed to inspect ${containerName}: ${inspectRes.error || 'Container not found'}`)
+  }
+
+  const containerInfo = inspectRes.body
+  const config = containerInfo.Config || {}
+  const hostConfig = containerInfo.HostConfig || {}
+  const networkSettings = containerInfo.NetworkSettings || {}
+
+  const currentImage = config.Image || defaultImage
+  const baseImage = currentImage.split(':')[0]
+  const targetImage = `${baseImage}:latest`
+
+  log(`Pulling latest image for ${baseImage}...`)
+  const pullRes = await dockerRequest(`/images/create?fromImage=${encodeURIComponent(baseImage)}&tag=latest`, 'POST', null, 180000)
+  if (pullRes.error) {
+    log(`Notice during pull of ${baseImage}: ${pullRes.error}`)
+  } else {
+    log(`Successfully pulled latest image for ${baseImage}`)
+  }
+
+  log(`Stopping container ${containerName}...`)
+  await dockerRequest(`/containers/${containerName}/stop?t=10`, 'POST')
+
+  log(`Removing old container ${containerName}...`)
+  const rmRes = await dockerRequest(`/containers/${containerName}?v=false&force=true`, 'DELETE')
+  if (rmRes.error) {
+    log(`Notice during removal: ${rmRes.error}`)
+  }
+
+  log(`Recreating ${containerName} with latest image ${targetImage}...`)
+  const createPayload = {
+    Image: targetImage,
+    Cmd: config.Cmd,
+    Entrypoint: config.Entrypoint,
+    Env: config.Env,
+    User: config.User,
+    Tty: config.Tty,
+    OpenStdin: config.OpenStdin,
+    Labels: config.Labels,
+    WorkingDir: config.WorkingDir,
+    HostConfig: hostConfig
+  }
+
+  if (networkSettings.Networks && hostConfig.NetworkMode !== 'host') {
+    createPayload.NetworkingConfig = {
+      EndpointsConfig: networkSettings.Networks
+    }
+  }
+
+  const createRes = await dockerRequest(`/containers/create?name=${containerName}`, 'POST', JSON.stringify(createPayload))
+  if (createRes.error || !createRes.body?.Id) {
+    throw new Error(`Failed to create ${containerName}: ${createRes.error || JSON.stringify(createRes.body)}`)
+  }
+
+  const newId = createRes.body.Id
+  log(`Created new container ${containerName} (${newId.slice(0, 12)})`)
+
+  log(`Starting container ${containerName}...`)
+  const startRes = await dockerRequest(`/containers/${newId}/start`, 'POST')
+  if (startRes.error) {
+    throw new Error(`Failed to start ${containerName}: ${startRes.error}`)
+  }
+  log(`Started container ${containerName} successfully!`)
+
+  return { container: containerName, id: newId, logs }
 }
 
 // Ping a Minecraft Bedrock server via RakNet Unconnected Ping (UDP)
@@ -502,6 +757,61 @@ const server = http.createServer(async (req, res) => {
         return sendJson({ success: true, message: 'Cleared login tokens and restarted broadcaster' })
       } catch (e) {
         return sendJson({ error: e.message }, 500)
+      }
+    }
+
+    // 14. Check Version & Update Status
+    if (url.pathname === '/api/version/status' && req.method === 'GET') {
+      const refresh = url.searchParams.get('refresh') === 'true'
+      const status = await checkVersionStatus(refresh)
+      return sendJson(status)
+    }
+
+    // 15. Force Remote Version Check
+    if (url.pathname === '/api/version/check' && req.method === 'POST') {
+      const status = await checkVersionStatus(true)
+      return sendJson(status)
+    }
+
+    // 16. One-Click Stack Update (Re-pull images & recreate containers)
+    if (url.pathname === '/api/version/update' && req.method === 'POST') {
+      try {
+        console.log('[Stack Update] Initiating stack update...')
+        const results = []
+
+        // Update Bedrock Proxy (BedrockConnect)
+        try {
+          const r1 = await updateAndRecreateContainer(TARGET_CONTAINER, 'pugmatt/bedrock-connect:latest')
+          results.push(r1)
+        } catch (e1) {
+          console.error('[Stack Update] Error updating proxy:', e1.message)
+          results.push({ container: TARGET_CONTAINER, error: e1.message })
+        }
+
+        // Update Xbox Broadcaster (MCXboxBroadcast)
+        try {
+          const r2 = await updateAndRecreateContainer(XBOX_CONTAINER, 'ghcr.io/mcxboxbroadcast/standalone:latest')
+          results.push(r2)
+        } catch (e2) {
+          console.error('[Stack Update] Error updating broadcaster:', e2.message)
+          results.push({ container: XBOX_CONTAINER, error: e2.message })
+        }
+
+        // Wait 4 seconds for containers to initialize and write startup logs
+        await new Promise(r => setTimeout(r, 4000))
+
+        // Re-read version status with forceRemote
+        const freshStatus = await checkVersionStatus(true)
+
+        return sendJson({
+          success: true,
+          message: 'Stack updated successfully!',
+          results,
+          versionStatus: freshStatus
+        })
+      } catch (err) {
+        console.error('[Stack Update] Fatal update error:', err.message)
+        return sendJson({ success: false, error: err.message }, 500)
       }
     }
 

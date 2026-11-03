@@ -572,6 +572,52 @@
       font-size: 0.8rem;
     }
 
+    /* Update Alert Banner & Version Tag */
+    .update-banner {
+      background: rgba(245, 158, 11, 0.12);
+      border: 2px solid var(--mc-gold);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px var(--mc-gold-glow);
+      animation: bannerPulse 2.5s infinite ease-in-out;
+    }
+    @keyframes bannerPulse {
+      0%, 100% { border-color: var(--mc-gold); box-shadow: 0 0 16px var(--mc-gold-glow); }
+      50% { border-color: #fde047; box-shadow: 0 0 24px rgba(253, 224, 71, 0.5); }
+    }
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: #090e13;
+      border: 1px solid var(--mc-border);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--mc-diamond);
+    }
+    .update-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #15803d;
+      color: #86efac;
+      border: 1px solid #22c55e;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .update-pill.has-update {
+      background: #b45309;
+      color: #fef08a;
+      border-color: #facc15;
+      animation: pulse-glow 1.5s infinite;
+    }
+
     /* Animated Minecraft SVG Icons */
     .mc-icon {
       display: inline-block;
@@ -1262,7 +1308,13 @@
           <div class="subtitle">Custom Server Menu & Xbox Live Friend Gateway</div>
         </div>
       </div>
-      <div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-secondary" onclick="openUpdateModal()" title="View Bedrock version & check updates">
+          <svg class="mc-icon" viewBox="0 0 24 24" width="16" height="16">
+            <polygon points="12,2 15,8 21,9 17,14 18,20 12,17 6,20 7,14 3,9 9,8" fill="#facc15" stroke="#b45309" stroke-width="1.2"/>
+          </svg>
+          Bedrock Updates
+        </button>
         <button class="btn btn-secondary" onclick="openLogsModal()">
           <svg class="mc-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
@@ -1272,17 +1324,49 @@
       </div>
     </header>
 
+    <!-- Version Update Alert Banner (Shown when newer Bedrock version is detected) -->
+    <div id="updateBanner" class="update-banner" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <!-- Minecraft Nether Star SVG -->
+          <svg class="mc-icon" viewBox="0 0 24 24" width="28" height="28">
+            <polygon points="12,2 15,8 21,9 17,14 18,20 12,17 6,20 7,14 3,9 9,8" fill="#facc15" stroke="#b45309" stroke-width="1.2"/>
+            <polygon points="12,5 14,9 18,10 15,14 16,18 12,16 8,18 9,14 6,10 10,9" fill="#fef08a"/>
+          </svg>
+          <div>
+            <div style="font-weight:700; font-size:1rem; color:#facc15;" id="updateBannerTitle">
+              New Minecraft Bedrock Version Available!
+            </div>
+            <div style="font-size:0.86rem; color:var(--mc-text-muted); margin-top:3px;" id="updateBannerDesc">
+              Your containers are running Bedrock 1.26.50. A newer build is available!
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-emerald btn-sm" onclick="openUpdateModal()">🚀 Quick Update Stack</button>
+          <button class="btn btn-secondary btn-sm" onclick="dismissUpdateBanner()">✕</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Proxy Container Status Card -->
     <div class="card" id="proxyCard">
       <div class="status-bar">
-        <div style="display:flex; align-items:center; gap: 14px; flex-wrap: wrap;">
+        <div style="display:flex; align-items:center; gap: 12px; flex-wrap: wrap;">
           <div class="status-badge">
             <span class="status-dot" id="proxyDot"></span>
             <span id="proxyStatusText">CHECKING PROXY...</span>
           </div>
           <span id="proxyDetails" style="font-size: 0.88rem; color: var(--mc-text-muted); font-family: var(--font-mono);"></span>
+          <!-- Bedrock Version Pill -->
+          <span class="version-badge" id="bedrockVersionBadge" title="Current Minecraft Bedrock version">
+            🎮 <strong id="bedrockVersionText">Bedrock ...</strong>
+            <span class="update-pill" id="updatePillBadge" style="display:none;"></span>
+          </span>
         </div>
         <div class="status-bar-buttons" style="display:flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" id="btnCheckUpdates" onclick="checkVersionUpdates(true)" title="Check if a new Bedrock image has been released">🔍 Check Updates</button>
+          <button class="btn btn-emerald btn-sm" id="btnQuickUpdateProxy" onclick="openUpdateModal()" style="display:none;" title="Update stack to match latest Bedrock version">🚀 Update Stack</button>
           <button class="btn btn-secondary btn-sm" onclick="checkProxyStatus()">🔄 Refresh</button>
           <button class="btn btn-danger btn-sm" id="btnRestart" onclick="restartProxy()">⚡ Restart Proxy</button>
         </div>
@@ -1578,6 +1662,56 @@
       <div class="logs-box" id="xboxLogsContent">Loading logs...</div>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeXboxLogsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bedrock Stack Version & Update Modal -->
+  <div class="modal-backdrop" id="updateModal">
+    <div class="modal" style="max-width: 620px;">
+      <h3 class="modal-title">
+        <svg class="mc-icon" viewBox="0 0 24 24" width="22" height="22">
+          <polygon points="12,2 15,8 21,9 17,14 18,20 12,17 6,20 7,14 3,9 9,8" fill="#facc15" stroke="#b45309" stroke-width="1.2"/>
+          <polygon points="12,5 14,9 18,10 15,14 16,18 12,16 8,18 9,14 6,10 10,9" fill="#fef08a"/>
+        </svg>
+        Bedrock Version & Auto-Update
+      </h3>
+
+      <div style="background:var(--mc-card-inner); border:1px solid var(--mc-border); border-radius:8px; padding:16px; margin-bottom:16px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div>
+            <div style="font-size:0.75rem; color:var(--mc-text-muted); text-transform:uppercase; font-weight:600;">Current Proxy Version</div>
+            <div style="font-family:var(--font-mono); font-size:1.2rem; font-weight:700; color:var(--mc-diamond); margin-top:4px;" id="modalCurrentVersion">
+              Detecting...
+            </div>
+            <div style="font-size:0.78rem; color:var(--mc-text-muted); margin-top:2px;" id="modalCurrentProtocol">Protocol ...</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem; color:var(--mc-text-muted); text-transform:uppercase; font-weight:600;">Latest Upstream Version</div>
+            <div style="font-family:var(--font-mono); font-size:1.2rem; font-weight:700; color:#4ade80; margin-top:4px;" id="modalLatestVersion">
+              Checking...
+            </div>
+            <div style="font-size:0.78rem; color:var(--mc-text-muted); margin-top:2px;" id="modalUpdateStatus">Status unknown</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:0.86rem; color:var(--mc-text); line-height:1.5; margin-bottom:14px;">
+        Updating will automatically re-pull the latest images and recreate both <strong>BedrockConnect</strong> and <strong>MCXboxBroadcast</strong> with zero loss to your custom servers or settings.
+      </div>
+
+      <!-- Update Progress Box -->
+      <div id="updateProgressBox" style="display:none; margin-bottom:16px;">
+        <div style="font-size:0.86rem; font-weight:600; color:var(--mc-diamond); margin-bottom:8px; display:flex; align-items:center; gap:8px;" id="updateProgressStep">
+          🔄 Starting update process...
+        </div>
+        <div class="logs-box" id="updateProgressLogs" style="height:140px; font-size:0.78rem;"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeUpdateModal()" id="btnCancelUpdate">Close</button>
+        <button class="btn btn-secondary" onclick="checkVersionUpdates(true)" id="btnCheckModal">🔍 Check Now</button>
+        <button class="btn btn-emerald" onclick="executeStackUpdate()" id="btnExecuteUpdate">🚀 Update Stack Now</button>
       </div>
     </div>
   </div>
@@ -2149,12 +2283,193 @@
         .replace(/"/g, '&quot;');
     }
 
+    // ==========================================
+    // BEDROCK VERSION CHECK & AUTO-UPDATE ENGINE
+    // ==========================================
+    let currentVersionInfo = null;
+
+    async function checkVersionUpdates(userInitiated = false) {
+      const btn = document.getElementById('btnCheckUpdates');
+      const modalBtn = document.getElementById('btnCheckModal');
+      const originalText = btn ? btn.textContent : '';
+      if (userInitiated && btn) {
+        btn.disabled = true;
+        btn.textContent = '🔍 Checking...';
+      }
+      if (userInitiated && modalBtn) {
+        modalBtn.disabled = true;
+        modalBtn.textContent = '🔍 Checking...';
+      }
+
+      try {
+        const endpoint = userInitiated ? '/api/version/check' : '/api/version/status';
+        const method = userInitiated ? 'POST' : 'GET';
+        const data = await apiRequest(endpoint, method);
+
+        currentVersionInfo = data;
+        renderVersionStatus(data);
+
+        if (userInitiated) {
+          if (data.hasUpdate) {
+            showToast(`New version available: Bedrock ${data.latestBedrockVersion}!`, 'success');
+          } else {
+            showToast(`Stack is up to date on Bedrock ${data.currentBedrockVersion || 'latest'}!`, 'info');
+          }
+        }
+      } catch (e) {
+        console.error('Failed to check version updates:', e);
+        if (userInitiated) showToast('Failed to connect to version update service', 'danger');
+      } finally {
+        if (userInitiated && btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+        if (userInitiated && modalBtn) {
+          modalBtn.disabled = false;
+          modalBtn.textContent = '🔍 Check Again';
+        }
+      }
+    }
+
+    function renderVersionStatus(info) {
+      if (!info) return;
+
+      const currentVer = info.currentBedrockVersion || '1.26.50';
+      const latestVer = info.latestBedrockVersion || '26.60';
+      const hasUpdate = Boolean(info.hasUpdate);
+
+      // 1. Status bar version badge
+      const badgeText = document.getElementById('bedrockVersionText');
+      if (badgeText) badgeText.textContent = `Bedrock ${currentVer}`;
+
+      const updatePill = document.getElementById('updatePillBadge');
+      const quickUpdateBtn = document.getElementById('btnQuickUpdateProxy');
+
+      if (updatePill) {
+        if (hasUpdate) {
+          updatePill.textContent = `▲ New: ${latestVer}`;
+          updatePill.className = 'update-pill has-update';
+          updatePill.style.display = 'inline-flex';
+        } else {
+          updatePill.textContent = '✔ Up to Date';
+          updatePill.className = 'update-pill';
+          updatePill.style.display = 'inline-flex';
+        }
+      }
+
+      if (quickUpdateBtn) {
+        quickUpdateBtn.style.display = hasUpdate ? 'inline-flex' : 'none';
+      }
+
+      // 2. Top notification banner
+      const banner = document.getElementById('updateBanner');
+      const dismissed = sessionStorage.getItem(`dismissed_update_${latestVer}`);
+
+      if (hasUpdate && !dismissed) {
+        banner.style.display = 'block';
+        document.getElementById('updateBannerTitle').textContent = `New Bedrock Version ${latestVer} Available!`;
+        document.getElementById('updateBannerDesc').innerHTML = 
+          `Your proxy is running <strong>Bedrock ${currentVer}</strong>. Mojang released <strong>Bedrock ${latestVer}</strong> — click Quick Update to update containers with zero config loss.`;
+      } else {
+        banner.style.display = 'none';
+      }
+
+      // 3. Modal details
+      const modalCur = document.getElementById('modalCurrentVersion');
+      const modalCurProto = document.getElementById('modalCurrentProtocol');
+      const modalLat = document.getElementById('modalLatestVersion');
+      const modalStatus = document.getElementById('modalUpdateStatus');
+
+      if (modalCur) modalCur.textContent = currentVer;
+      if (modalCurProto) modalCurProto.textContent = `Protocol ${info.currentProtocol || '2193'}`;
+      if (modalLat) modalLat.textContent = latestVer;
+      if (modalStatus) {
+        modalStatus.textContent = hasUpdate ? '⚠️ Update Available' : '✔ Up to Date';
+        modalStatus.style.color = hasUpdate ? 'var(--mc-gold)' : 'var(--mc-emerald)';
+      }
+    }
+
+    function dismissUpdateBanner() {
+      const banner = document.getElementById('updateBanner');
+      banner.style.display = 'none';
+      if (currentVersionInfo && currentVersionInfo.latestBedrockVersion) {
+        sessionStorage.setItem(`dismissed_update_${currentVersionInfo.latestBedrockVersion}`, 'true');
+      }
+    }
+
+    function openUpdateModal() {
+      document.getElementById('updateModal').classList.add('open');
+      document.getElementById('updateProgressBox').style.display = 'none';
+      document.getElementById('btnExecuteUpdate').disabled = false;
+      document.getElementById('btnExecuteUpdate').textContent = '🚀 Update Stack Now';
+      checkVersionUpdates(false);
+    }
+
+    function closeUpdateModal() {
+      document.getElementById('updateModal').classList.remove('open');
+    }
+
+    async function executeStackUpdate() {
+      if (!confirm('This will pull the latest Docker images and restart your Bedrock Proxy & Xbox Broadcaster containers. Proceed?')) {
+        return;
+      }
+
+      const execBtn = document.getElementById('btnExecuteUpdate');
+      const cancelBtn = document.getElementById('btnCancelUpdate');
+      const checkBtn = document.getElementById('btnCheckModal');
+      const progressBox = document.getElementById('updateProgressBox');
+      const progressStep = document.getElementById('updateProgressStep');
+      const progressLogs = document.getElementById('updateProgressLogs');
+
+      execBtn.disabled = true;
+      cancelBtn.disabled = true;
+      checkBtn.disabled = true;
+      execBtn.textContent = '🔄 Updating Stack...';
+
+      progressBox.style.display = 'block';
+      progressStep.textContent = '📥 Pulling latest Docker images and recreating containers...';
+      progressLogs.textContent = 'Connecting to Docker daemon...\nPulling latest ghcr.io/mcxboxbroadcast/standalone:latest and pugmatt/bedrock-connect:latest...\nThis may take 15-30 seconds depending on connection speed.\n';
+
+      try {
+        const res = await apiRequest('/api/version/update', 'POST');
+        if (res.success) {
+          progressStep.textContent = '✅ Stack successfully updated!';
+          progressLogs.textContent += '\n' + (res.results?.map(r => `Container: ${r.container} -> Updated (ID: ${r.id?.slice(0, 12) || 'OK'})`).join('\n') || 'All containers recreated.');
+          progressLogs.textContent += `\nNew Bedrock Version Active: ${res.versionStatus?.currentBedrockVersion || 'Updated'}\n`;
+          progressLogs.scrollTop = progressLogs.scrollHeight;
+
+          showToast('Stack updated to latest Bedrock version!', 'success');
+          renderVersionStatus(res.versionStatus);
+
+          setTimeout(() => {
+            checkProxyStatus();
+            checkXboxStatus();
+          }, 3000);
+        } else {
+          progressStep.textContent = '❌ Update failed';
+          progressLogs.textContent += `\nError: ${res.error || 'Failed to complete update'}\n`;
+          showToast('Update failed: ' + (res.error || ''), 'danger');
+        }
+      } catch (err) {
+        progressStep.textContent = '❌ Connection error';
+        progressLogs.textContent += `\nError communicating with Docker: ${err.message}\n`;
+        showToast('Error requesting update', 'danger');
+      } finally {
+        execBtn.disabled = false;
+        cancelBtn.disabled = false;
+        checkBtn.disabled = false;
+        execBtn.textContent = '🚀 Update Stack Now';
+      }
+    }
+
     // Initialize
     loadServers();
     checkProxyStatus();
     checkXboxStatus();
+    checkVersionUpdates();
     setInterval(checkProxyStatus, 10000);
     setInterval(checkXboxStatus, 15000);
+    setInterval(() => checkVersionUpdates(false), 5 * 60 * 1000);
   </script>
 </body>
 </html>
